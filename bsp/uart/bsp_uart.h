@@ -4,6 +4,7 @@
 #include "hal_data.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <string.h>
 
 #define DEVICE_USART_CNT 4
 #define USART_RXBUFF_LIMIT 256

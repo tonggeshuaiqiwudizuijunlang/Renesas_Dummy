@@ -1,5 +1,8 @@
 #include "daemon_task.h"
 #include "daemon.h"
+#include "vision.h"
+
+Transmit_Data_s temp_data = {0};
 
 /* DaemonTask entry function */
 /* pvParameters contains TaskHandle_t */

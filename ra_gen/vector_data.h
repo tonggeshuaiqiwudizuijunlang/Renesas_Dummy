@@ -6,7 +6,7 @@
         #endif
                 /* Number of interrupts allocated */
         #ifndef VECTOR_DATA_IRQ_COUNT
-        #define VECTOR_DATA_IRQ_COUNT    (17)
+        #define VECTOR_DATA_IRQ_COUNT    (21)
         #endif
         /* ISR prototypes */
         void canfd_error_isr(void);
@@ -17,6 +17,10 @@
         void sci_uart_txi_isr(void);
         void sci_uart_tei_isr(void);
         void sci_uart_eri_isr(void);
+        void usbfs_interrupt_handler(void);
+        void usbfs_resume_handler(void);
+        void usbfs_d0fifo_handler(void);
+        void usbfs_d1fifo_handler(void);
 
         /* Vector table allocations */
         #define VECTOR_NUMBER_CAN0_CHERR ((IRQn_Type) 0) /* CAN0 CHERR (Channel  error) */
@@ -53,8 +57,16 @@
         #define SCI6_TEI_IRQn          ((IRQn_Type) 15) /* SCI6 TEI (Transmit end) */
         #define VECTOR_NUMBER_SCI6_ERI ((IRQn_Type) 16) /* SCI6 ERI (Receive error) */
         #define SCI6_ERI_IRQn          ((IRQn_Type) 16) /* SCI6 ERI (Receive error) */
+        #define VECTOR_NUMBER_USBFS_INT ((IRQn_Type) 17) /* USBFS INT (USBFS interrupt) */
+        #define USBFS_INT_IRQn          ((IRQn_Type) 17) /* USBFS INT (USBFS interrupt) */
+        #define VECTOR_NUMBER_USBFS_RESUME ((IRQn_Type) 18) /* USBFS RESUME (USBFS resume interrupt) */
+        #define USBFS_RESUME_IRQn          ((IRQn_Type) 18) /* USBFS RESUME (USBFS resume interrupt) */
+        #define VECTOR_NUMBER_USBFS_FIFO_0 ((IRQn_Type) 19) /* USBFS FIFO 0 (DMA/DTC transfer request 0) */
+        #define USBFS_FIFO_0_IRQn          ((IRQn_Type) 19) /* USBFS FIFO 0 (DMA/DTC transfer request 0) */
+        #define VECTOR_NUMBER_USBFS_FIFO_1 ((IRQn_Type) 20) /* USBFS FIFO 1 (DMA/DTC transfer request 1) */
+        #define USBFS_FIFO_1_IRQn          ((IRQn_Type) 20) /* USBFS FIFO 1 (DMA/DTC transfer request 1) */
         /* The number of entries required for the ICU vector table. */
-        #define BSP_ICU_VECTOR_NUM_ENTRIES (17)
+        #define BSP_ICU_VECTOR_NUM_ENTRIES (21)
 
         #ifdef __cplusplus
         }

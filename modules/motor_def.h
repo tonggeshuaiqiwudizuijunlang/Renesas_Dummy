@@ -14,7 +14,6 @@
 
 #include "controller.h"
 #include "bsp_can.h"
-#include "dummy_kinematic.h"
 #include "step_motor.h"
 #include "message_center.h"
 

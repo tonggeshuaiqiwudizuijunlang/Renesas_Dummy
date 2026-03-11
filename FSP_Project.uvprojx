@@ -340,7 +340,7 @@
               <MiscControls>@./via/rasc_armclang.via</MiscControls>
               <Define></Define>
               <Undefine></Undefine>
-              <IncludePath>..\keil_test;.\ra;.\ra_cfg;.\ra_gen;.\bsp;.\bsp\dwt;.\bsp\can;.\bsp\uart;.\bsp\gpio;.\modules;.\modules\daemon;.\modules\controller;.\modules\step_motor;.\modules\message_center;.\modules\dummy_kinematic;.\modules\remote;.\modules\wifi;.\application</IncludePath>
+              <IncludePath>..\keil_test;.\ra;.\ra_cfg;.\ra_gen;.\bsp;.\bsp\dwt;.\bsp\can;.\bsp\uart;.\bsp\gpio;.\bsp\usb;.\modules;.\modules\daemon;.\modules\controller;.\modules\step_motor;.\modules\message_center;.\modules\dummy_kinematic;.\modules\bluetooth;.\modules\vision;.\modules\remote;.\modules\wifi;.\application;.\src</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -449,6 +449,21 @@
               <FileType>5</FileType>
               <FilePath>.\bsp\dwt\bsp_dwt.h</FilePath>
             </File>
+            <File>
+              <FileName>bsp_usb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\bsp\usb\bsp_usb.c</FilePath>
+            </File>
+            <File>
+              <FileName>bsp_usb.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\bsp\usb\bsp_usb.h</FilePath>
+            </File>
+            <File>
+              <FileName>r_usb_pcdc_descriptor.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\bsp\usb\r_usb_pcdc_descriptor.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -510,29 +525,39 @@
               <FilePath>.\modules\remote\mc6c.h</FilePath>
             </File>
             <File>
-              <FileName>wifi.c</FileName>
+              <FileName>dummy_kinematic_v2.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\modules\wifi\wifi.c</FilePath>
+              <FilePath>.\modules\dummy_kinematic\dummy_kinematic_v2.c</FilePath>
             </File>
             <File>
-              <FileName>wifi.h</FileName>
+              <FileName>dummy_kinematic_v2.h</FileName>
               <FileType>5</FileType>
-              <FilePath>.\modules\wifi\wifi.h</FilePath>
-            </File>
-            <File>
-              <FileName>dummy_kinematic.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\modules\dummy_kinematic\dummy_kinematic.c</FilePath>
-            </File>
-            <File>
-              <FileName>dummy_kinematic.h</FileName>
-              <FileType>5</FileType>
-              <FilePath>.\modules\dummy_kinematic\dummy_kinematic.h</FilePath>
+              <FilePath>.\modules\dummy_kinematic\dummy_kinematic_v2.h</FilePath>
             </File>
             <File>
               <FileName>robot_types.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\modules\robot_types.h</FilePath>
+            </File>
+            <File>
+              <FileName>vision.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\modules\vision\vision.c</FilePath>
+            </File>
+            <File>
+              <FileName>vision.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\modules\vision\vision.h</FilePath>
+            </File>
+            <File>
+              <FileName>bluetooth.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\modules\bluetooth\bluetooth.c</FilePath>
+            </File>
+            <File>
+              <FileName>bluetooth.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\modules\bluetooth\bluetooth.h</FilePath>
             </File>
           </Files>
         </Group>
@@ -558,6 +583,16 @@
               <FileName>dummy_motormatic.h</FileName>
               <FileType>5</FileType>
               <FilePath>.\application\dummy_motormatic.h</FilePath>
+            </File>
+            <File>
+              <FileName>dummy_vision.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\application\dummy_vision.c</FilePath>
+            </File>
+            <File>
+              <FileName>dummy_vision.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>.\application\dummy_vision.h</FilePath>
             </File>
           </Files>
         </Group>

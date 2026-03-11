@@ -2,7 +2,7 @@
 #define DUMMY_MOTORMATIC_H
 
 #include "robot_types.h"
-#include "dummy_kinematic.h"
+#include "dummy_kinematic_v2.h"
 
 
 

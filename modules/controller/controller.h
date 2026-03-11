@@ -137,5 +137,6 @@ void PIDInit(PIDInstance *pid, PID_Init_Config_s *config);
 float PIDCalculate(PIDInstance *pid, float measure, float ref);
 float PIDCalculate1(PIDInstance *pid, float measure, float ref);
 float PID_increment(PIDInstance *PID, float measure, float ref);
+float map_float_clamp(float x, float in_min, float in_max, float out_min, float out_max);
 #endif
 

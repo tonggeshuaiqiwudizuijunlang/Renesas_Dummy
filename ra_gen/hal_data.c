@@ -1,5 +1,94 @@
 /* generated HAL source file - do not edit */
 #include "hal_data.h"
+usb_instance_ctrl_t usb_pcdc_basic_ctrl;
+
+#if !defined(g_usb_descriptor)
+extern usb_descriptor_t g_usb_descriptor;
+#endif
+#define RA_NOT_DEFINED (1)
+            const usb_cfg_t usb_pcdc_basic_cfg =
+            {
+                .usb_mode  = USB_MODE_PERI,
+                .usb_speed = USB_SPEED_FS,
+                .module_number = 0,
+                .type = USB_CLASS_PCDC,
+#if defined(g_usb_descriptor)
+                .p_usb_reg = g_usb_descriptor,
+#else
+                .p_usb_reg = &g_usb_descriptor,
+#endif
+                .usb_complience_cb = NULL,
+#if defined(VECTOR_NUMBER_USBFS_INT)
+                .irq       = VECTOR_NUMBER_USBFS_INT,
+#else
+                .irq       = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_USBFS_RESUME)
+                .irq_r     = VECTOR_NUMBER_USBFS_RESUME,
+#else
+                .irq_r     = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_USBFS_FIFO_0)
+                .irq_d0    = VECTOR_NUMBER_USBFS_FIFO_0,
+#else
+                .irq_d0    = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_USBFS_FIFO_1)
+                .irq_d1    = VECTOR_NUMBER_USBFS_FIFO_1,
+#else
+                .irq_d1    = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_USBHS_USB_INT_RESUME)
+                .hsirq     = VECTOR_NUMBER_USBHS_USB_INT_RESUME,
+#else
+                .hsirq     = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_USBHS_FIFO_0)
+                .hsirq_d0  = VECTOR_NUMBER_USBHS_FIFO_0,
+#else
+                .hsirq_d0  = FSP_INVALID_VECTOR,
+#endif
+#if defined(VECTOR_NUMBER_USBHS_FIFO_1)
+                .hsirq_d1  = VECTOR_NUMBER_USBHS_FIFO_1,
+#else
+                .hsirq_d1  = FSP_INVALID_VECTOR,
+#endif
+                .ipl       = (6),
+                .ipl_r     = (6),
+                .ipl_d0    = (6),
+                .ipl_d1    = (6),
+                .hsipl     = (BSP_IRQ_DISABLED),
+                .hsipl_d0  = (BSP_IRQ_DISABLED),
+                .hsipl_d1  = (BSP_IRQ_DISABLED),
+#if (BSP_CFG_RTOS == 0) && defined(USB_CFG_HMSC_USE)
+                .p_usb_apl_callback = NULL,
+#else
+                .p_usb_apl_callback = usb_cdc_callback,
+#endif
+#if defined(NULL)
+                .p_context = NULL,
+#else
+                .p_context = (void *) &NULL,
+#endif
+#if (RA_NOT_DEFINED == RA_NOT_DEFINED)
+#else
+                .p_transfer_tx = &RA_NOT_DEFINED,
+#endif
+#if (RA_NOT_DEFINED == RA_NOT_DEFINED)
+#else
+                .p_transfer_rx = &RA_NOT_DEFINED,
+#endif
+            };
+#undef RA_NOT_DEFINED
+
+/* Instance structure to use this module. */
+const usb_instance_t usb_pcdc_basic =
+{
+    .p_ctrl        = &usb_pcdc_basic_ctrl,
+    .p_cfg         = &usb_pcdc_basic_cfg,
+    .p_api         = &g_usb_on_usb,
+};
+
 dtc_instance_ctrl_t wifi_dtc_transfer_ctrl;
 
 #if (1 == 1)
@@ -141,10 +230,10 @@ const uart_instance_t wifi_uart =
     .p_cfg         = &wifi_uart_cfg,
     .p_api         = &g_uart_on_sci
 };
-dtc_instance_ctrl_t g_transfer0_ctrl;
+dtc_instance_ctrl_t pc_transfer0_ctrl;
 
 #if (1 == 1)
-transfer_info_t g_transfer0_info DTC_TRANSFER_INFO_ALIGNMENT =
+transfer_info_t pc_transfer0_info DTC_TRANSFER_INFO_ALIGNMENT =
 {
     .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_INCREMENTED,
     .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_DESTINATION,
@@ -161,39 +250,39 @@ transfer_info_t g_transfer0_info DTC_TRANSFER_INFO_ALIGNMENT =
 
 #elif (1 > 1)
 /* User is responsible to initialize the array. */
-transfer_info_t g_transfer0_info[1] DTC_TRANSFER_INFO_ALIGNMENT;
+transfer_info_t pc_transfer0_info[1] DTC_TRANSFER_INFO_ALIGNMENT;
 #else
 /* User must call api::reconfigure before enable DTC transfer. */
 #endif
 
-const dtc_extended_cfg_t g_transfer0_cfg_extend =
+const dtc_extended_cfg_t pc_transfer0_cfg_extend =
 {
     .activation_source   = VECTOR_NUMBER_SCI5_RXI,
 };
 
-const transfer_cfg_t g_transfer0_cfg =
+const transfer_cfg_t pc_transfer0_cfg =
 {
 #if (1 == 1)
-    .p_info              = &g_transfer0_info,
+    .p_info              = &pc_transfer0_info,
 #elif (1 > 1)
-    .p_info              = g_transfer0_info,
+    .p_info              = pc_transfer0_info,
 #else
     .p_info = NULL,
 #endif
-    .p_extend            = &g_transfer0_cfg_extend,
+    .p_extend            = &pc_transfer0_cfg_extend,
 };
 
 /* Instance structure to use this module. */
-const transfer_instance_t g_transfer0 =
+const transfer_instance_t pc_transfer0 =
 {
-    .p_ctrl        = &g_transfer0_ctrl,
-    .p_cfg         = &g_transfer0_cfg,
+    .p_ctrl        = &pc_transfer0_ctrl,
+    .p_cfg         = &pc_transfer0_cfg,
     .p_api         = &g_transfer_on_dtc
 };
-dtc_instance_ctrl_t g_transfer1_ctrl;
+dtc_instance_ctrl_t pc_transfer1_ctrl;
 
 #if (1 == 1)
-transfer_info_t g_transfer1_info DTC_TRANSFER_INFO_ALIGNMENT =
+transfer_info_t pc_transfer1_info DTC_TRANSFER_INFO_ALIGNMENT =
 {
     .transfer_settings_word_b.dest_addr_mode = TRANSFER_ADDR_MODE_FIXED,
     .transfer_settings_word_b.repeat_area    = TRANSFER_REPEAT_AREA_SOURCE,
@@ -210,50 +299,50 @@ transfer_info_t g_transfer1_info DTC_TRANSFER_INFO_ALIGNMENT =
 
 #elif (1 > 1)
 /* User is responsible to initialize the array. */
-transfer_info_t g_transfer1_info[1] DTC_TRANSFER_INFO_ALIGNMENT;
+transfer_info_t pc_transfer1_info[1] DTC_TRANSFER_INFO_ALIGNMENT;
 #else
 /* User must call api::reconfigure before enable DTC transfer. */
 #endif
 
-const dtc_extended_cfg_t g_transfer1_cfg_extend =
+const dtc_extended_cfg_t pc_transfer1_cfg_extend =
 {
     .activation_source   = VECTOR_NUMBER_SCI5_TXI,
 };
 
-const transfer_cfg_t g_transfer1_cfg =
+const transfer_cfg_t pc_transfer1_cfg =
 {
 #if (1 == 1)
-    .p_info              = &g_transfer1_info,
+    .p_info              = &pc_transfer1_info,
 #elif (1 > 1)
-    .p_info              = g_transfer1_info,
+    .p_info              = pc_transfer1_info,
 #else
     .p_info = NULL,
 #endif
-    .p_extend            = &g_transfer1_cfg_extend,
+    .p_extend            = &pc_transfer1_cfg_extend,
 };
 
 /* Instance structure to use this module. */
-const transfer_instance_t g_transfer1 =
+const transfer_instance_t pc_transfer1 =
 {
-    .p_ctrl        = &g_transfer1_ctrl,
-    .p_cfg         = &g_transfer1_cfg,
+    .p_ctrl        = &pc_transfer1_ctrl,
+    .p_cfg         = &pc_transfer1_cfg,
     .p_api         = &g_transfer_on_dtc
 };
-sci_uart_instance_ctrl_t     uart5_ctrl;
+sci_uart_instance_ctrl_t     pc_uart_ctrl;
 
-            baud_setting_t               uart5_baud_setting =
+            baud_setting_t               pc_uart_baud_setting =
             {
                 /* Baud rate calculated with 0.469% error. */ .semr_baudrate_bits_b.abcse = 0, .semr_baudrate_bits_b.abcs = 0, .semr_baudrate_bits_b.bgdm = 1, .cks = 0, .brr = 53, .mddr = (uint8_t) 256, .semr_baudrate_bits_b.brme = false
             };
 
             /** UART extended configuration for UARTonSCI HAL driver */
-            const sci_uart_extended_cfg_t uart5_cfg_extend =
+            const sci_uart_extended_cfg_t pc_uart_cfg_extend =
             {
                 .clock                = SCI_UART_CLOCK_INT,
                 .rx_edge_start          = SCI_UART_START_BIT_FALLING_EDGE,
                 .noise_cancel         = SCI_UART_NOISE_CANCELLATION_DISABLE,
                 .rx_fifo_trigger        = SCI_UART_RX_FIFO_TRIGGER_MAX,
-                .p_baud_setting         = &uart5_baud_setting,
+                .p_baud_setting         = &pc_uart_baud_setting,
                 .flow_control           = SCI_UART_FLOW_CONTROL_RTS,
                 #if 0xFF != 0xFF
                 .flow_control_pin       = BSP_IO_PORT_FF_PIN_0xFF,
@@ -277,7 +366,7 @@ sci_uart_instance_ctrl_t     uart5_ctrl;
             };
 
             /** UART interface configuration */
-            const uart_cfg_t uart5_cfg =
+            const uart_cfg_t pc_uart_cfg =
             {
                 .channel             = 5,
                 .data_bits           = UART_DATA_BITS_8,
@@ -285,17 +374,17 @@ sci_uart_instance_ctrl_t     uart5_ctrl;
                 .stop_bits           = UART_STOP_BITS_1,
                 .p_callback          = UART_Global_Callback,
                 .p_context           = NULL,
-                .p_extend            = &uart5_cfg_extend,
+                .p_extend            = &pc_uart_cfg_extend,
 #define RA_NOT_DEFINED (1)
-#if (RA_NOT_DEFINED == g_transfer1)
+#if (RA_NOT_DEFINED == pc_transfer1)
                 .p_transfer_tx       = NULL,
 #else
-                .p_transfer_tx       = &g_transfer1,
+                .p_transfer_tx       = &pc_transfer1,
 #endif
-#if (RA_NOT_DEFINED == g_transfer0)
+#if (RA_NOT_DEFINED == pc_transfer0)
                 .p_transfer_rx       = NULL,
 #else
-                .p_transfer_rx       = &g_transfer0,
+                .p_transfer_rx       = &pc_transfer0,
 #endif
 #undef RA_NOT_DEFINED
                 .rxi_ipl             = (5),
@@ -325,10 +414,10 @@ sci_uart_instance_ctrl_t     uart5_ctrl;
             };
 
 /* Instance structure to use this module. */
-const uart_instance_t uart5 =
+const uart_instance_t pc_uart =
 {
-    .p_ctrl        = &uart5_ctrl,
-    .p_cfg         = &uart5_cfg,
+    .p_ctrl        = &pc_uart_ctrl,
+    .p_cfg         = &pc_uart_cfg,
     .p_api         = &g_uart_on_sci
 };
 dtc_instance_ctrl_t sbus_dtc_transfer_ctrl;

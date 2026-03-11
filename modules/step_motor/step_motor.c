@@ -50,6 +50,7 @@ static void Joint_Motor_Callback(CANInstance *_instance)
         return;
 
     Joint_t *joint = &dummy_joints[node_id];
+    StepMotor_Config_t *joint_config = &joint_configs[node_id];
     switch (cmd)
     {
     case CMD_GET_CURRENT: // 0x21 Response
@@ -71,10 +72,13 @@ static void Joint_Motor_Callback(CANInstance *_instance)
     case CMD_GET_POSITION: // 0x23 Response (包含 0x05 带有 ACK 时的回复)
     {
         if (_instance->rx_len >= 4)
+        {
             memcpy(&joint->turns, _instance->rx_buff, 4);
+            joint->reduction_angle = (joint->turns * 360.0f / joint_config->reduction_ratio); // 转换为角度
+        }
         if (_instance->rx_len >= 5)
             joint->is_finished = _instance->rx_buff[4];
-        joint->reduction_angle = (joint->turns * 360.0f / joint->config.reduction_ratio); // 转换为角度
+        
         break;
     }
     case CMD_GET_OFFSET: // 0x24 Response
@@ -117,28 +121,22 @@ void Joint_Motor_Init(StepMotor_Config_t *configs)
         for(uint8_t i=1; i<=ARM_JOINT_COUNT; i++) {
             joint_configs[i] = configs[i-1]; // 传入数组0-5，存入1-6
         }
-    } else {
-        // 默认配置
-        for(uint8_t i=1; i<=ARM_JOINT_COUNT; i++) {
-            joint_configs[i].reduction_ratio = 1.0f;
-            joint_configs[i].reverse_flag = false;
-        }
     }
     /* 1. 清空结构体 */
     memset(dummy_joints, 0, sizeof(dummy_joints));
-    for (int i = 1; i <= ARM_JOINT_COUNT; i++)
+    for (uint8_t i = 1; i <= ARM_JOINT_COUNT; i++)
     {
         dummy_joints[i].id = (uint8_t)i;
     }
-    is_driver_initialized = true;
     Joint_Motor_Enable(0, true);
+    is_driver_initialized = true;
 }
 
 void Joint_Motor_Enable(uint8_t id, bool enable)
 {
     /* Slave Case 0x01: *(uint32_t*) (RxData) == 1 */
     /* Master 发送 uint32_t */
-    Send_U32(id, CMD_ENABLE, enable ? 1 : 0);
+    Send_U32(id, CMD_ENABLE, enable);
 }
 
 /*
@@ -157,14 +155,16 @@ void Joint_Motor_Set_Pos_With_SpeedLimit(uint8_t id, float angle_degree, float s
 
     // 2. 角度(度) -> 电机圈数
     // 公式: 电机圈数 = (关节角度 / 360) * 减速比
-    float target_motor_turns = (angle_degree / 360.0f) * ratio + joint_configs[id].angle_offset;
+    // if(joint_configs[id].joint_max_angle < angle_degree)
+    //     angle_degree = joint_configs[id].joint_max_angle;
+    // if (joint_configs[id].joint_min_angle > angle_degree)
+    //     angle_degree = joint_configs[id].joint_min_angle;
 
+    float target_motor_turns = (angle_degree / 360.0f) * ratio;
     // 3. 处理方向反转
     if (joint_configs[id].reverse_flag)
-    {
         target_motor_turns = -target_motor_turns;
-    }
-    
+
     // 4. 速度换算: 度/秒 -> 圈/秒
     float target_motor_speed = (speed_limit_degree / 360.0f) * ratio;
     // 速度总是正数，不需要反转符号 (除非特定的速度环控制，但通常由位置环内部处理方向)
@@ -176,6 +176,47 @@ void Joint_Motor_Set_Pos_With_SpeedLimit(uint8_t id, float angle_degree, float s
     memcpy(buffer + 4, &target_motor_speed, 4);
 
     Send_Generic(id, CMD_POS_VEL_LIMIT, buffer, 8);
+}
+
+/*
+ * 位置控制 + 时间限制 (指定时间到达)
+ * @param id 电机编号
+ * @param angle_degree 目标关节角度 (度)
+ * @param time_limit 指定到达时间 (为浮点数，代表秒)
+ */
+void Joint_Motor_Set_Pos_With_Time(uint8_t id, float angle_degree, float time_limit)
+{
+    if (id < 1 || id > ARM_JOINT_COUNT) return;
+
+    // 1. 获取配置
+    float ratio = joint_configs[id].reduction_ratio;
+    if (ratio < 0.001f) ratio = 1.0f; // 避免除零
+
+    // 2. 角度(度) -> 电机圈数
+    // 公式: 电机圈数 = (关节角度 / 360) * 减速比
+    if(joint_configs[id].joint_max_angle < angle_degree)
+        angle_degree = joint_configs[id].joint_max_angle;
+    if (joint_configs[id].joint_min_angle > angle_degree)
+        angle_degree = joint_configs[id].joint_min_angle;
+
+    float target_motor_turns = (angle_degree / 360.0f) * ratio;
+    
+    // 3. 处理方向反转
+    if (joint_configs[id].reverse_flag)
+        target_motor_turns = -target_motor_turns;
+
+    // 时间要求是非负的，不需要转换单位
+    if (time_limit < 0.0f)
+        time_limit = 0.0f;
+
+    // 4. 组包发送
+    // 根据 Dummy 通信协议，CMD_SET_POS_TIME(0x06) 通常是 float 位置 + float 时间
+    uint8_t buffer[8];
+    memcpy(buffer, &target_motor_turns, 4);
+    memcpy(buffer + 4, &time_limit, 4);
+    buffer[4] |= 0x01;
+
+    Send_Generic(id, CMD_SET_POS_TIME, buffer, 8);
 }
 
 void Joint_Motor_Set_Pos(uint8_t id, float turns, bool need_ack)
@@ -264,8 +305,25 @@ float Joint_Motor_Get_Angle(uint8_t id)
     return dummy_joints[id].reduction_angle; // 返回转换后的角度
 }
 
+uint8_t Joint_Motor_Get_State(uint8_t id)
+{
+    if (id < 1 || id > ARM_JOINT_COUNT)
+        return 0;
+    return dummy_joints[id].is_finished ? 1 : 0; // 简单返回是否完成
+}
+
+void Joint_All_Motor_Set(float joint1_angle, float joint2_angle, float joint3_angle, float joint4_angle, float joint5_angle, float joint6_angle)
+{
+    Joint_Motor_Set_Pos_With_SpeedLimit(1, joint1_angle, 10);
+    Joint_Motor_Set_Pos_With_SpeedLimit(2, joint2_angle, 10);
+    Joint_Motor_Set_Pos_With_SpeedLimit(3, joint3_angle, 10);
+    Joint_Motor_Set_Pos_With_SpeedLimit(4, joint4_angle, 10);
+    Joint_Motor_Set_Pos_With_SpeedLimit(5, joint5_angle, 10);
+    Joint_Motor_Set_Pos_With_SpeedLimit(6, joint6_angle, 10);
+}
+
 void CANTransmit_Test(void)
 {
-    // 测试 CAN 发送
-    Joint_Motor_Set_Pos_With_SpeedLimit(7, 1.0f, 0.5f);
+
 }
+

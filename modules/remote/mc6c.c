@@ -28,6 +28,17 @@ static void RectifyRCjoystick()
 }
 
 /**
+ * @brief 遥控器离线的回调函数,注册到守护进程中,串口掉线时调用
+ *
+ */
+static void MCLostCallback(void *id)
+{
+    (void)id;
+    memset(&mc_ctrl[TEMP], 0, sizeof(MC_ctrl_t)); // 遥控器数据清零
+    USART_Force_Restart(mc_usart_instance);
+}
+
+/**
  * @brief 遥控器数据解析
  *
  * @param sbus_buf 接收buffer
@@ -38,8 +49,8 @@ static void sbus_to_mc(const uint8_t *sbus_buf)
         return;
 
     mc_ctrl[TEMP].rocker_r_ = ((sbus_buf[1] | ((uint16_t)sbus_buf[2] << 8)) & 0x07FF) - MC_DATA_MID; 
-    mc_ctrl[TEMP].rocker_l1 = (((sbus_buf[2] >> 3) | ((uint16_t)sbus_buf[3] << 5)) & 0x07FF) - MC_DATA_MID; 
-    mc_ctrl[TEMP].rocker_r1 = (((sbus_buf[3] >> 6) | ((uint16_t)sbus_buf[4] << 2) | ((uint16_t)sbus_buf[5] << 10)) & 0x07FF) - MC_DATA_MID; 
+    mc_ctrl[TEMP].rocker_r1 = (((sbus_buf[2] >> 3) | ((uint16_t)sbus_buf[3] << 5)) & 0x07FF) - MC_DATA_MID; 
+    mc_ctrl[TEMP].rocker_l1 = (((sbus_buf[3] >> 6) | ((uint16_t)sbus_buf[4] << 2) | ((uint16_t)sbus_buf[5] << 10)) & 0x07FF) - MC_DATA_MID; 
     mc_ctrl[TEMP].rocker_l_ = (((sbus_buf[5] >> 1) | ((uint16_t)sbus_buf[6] << 7)) & 0x07FF) - MC_DATA_MID; 
     mc_ctrl[TEMP].switch_l = (((sbus_buf[6] >> 4) | ((uint16_t)sbus_buf[7] << 4)) & 0x07FF);
     mc_ctrl[TEMP].switch_r = (((sbus_buf[7] >> 7) | ((uint16_t)sbus_buf[8] << 1) | ((uint16_t)sbus_buf[9] << 9)) & 0x07FF);
@@ -47,7 +58,13 @@ static void sbus_to_mc(const uint8_t *sbus_buf)
     mc_ctrl[TEMP].none[1] = (((sbus_buf[10] >> 5) | ((uint16_t)sbus_buf[11] << 3)) & 0x07FF);
 
     mc_data_dead_limit(mc_ctrl[TEMP].rocker_l_, 5);
-    mc_data_dead_limit(mc_ctrl[TEMP].rocker_l1, 5);
+    
+    // 把原来简单的5死区，换成与上一次的值做比较，变化量小于20则认为是0（即保持原值，忽略抖动）
+    // 因为rocker_l1是不回中式的，所以用绝对控制好一些
+    if (abs(mc_ctrl[TEMP].rocker_l1 - mc_ctrl[LAST].rocker_l1) < 30) {
+        mc_ctrl[TEMP].rocker_l1 = mc_ctrl[LAST].rocker_l1;
+    }
+
     mc_data_dead_limit(mc_ctrl[TEMP].rocker_r_, 5);
     mc_data_dead_limit(mc_ctrl[TEMP].rocker_r1, 5);
 
@@ -107,16 +124,7 @@ static void MCRxCallback(void)
     }
 }
 
-/**
- * @brief 遥控器离线的回调函数,注册到守护进程中,串口掉线时调用
- *
- */
-static void MCLostCallback(void *id)
-{
-    (void)id;
-    memset(mc_ctrl, 0, sizeof(mc_ctrl));
-    USART_Force_Restart(mc_usart_instance);
-}
+
 
 /* Online保留 */
 uint8_t MCControlIsOnline()
@@ -143,7 +151,7 @@ MC_ctrl_t *MCControlInit(uart_ctrl_t *p_ctrl, uart_cfg_t const *p_cfg)
     mc_usart_instance = USARTRegister(&conf);
 
     Daemon_Init_Config_s daemon_conf = {
-        .reload_count = 20,
+        .reload_count = 200,
         .callback = MCLostCallback,
         .owner_id = NULL,
     };

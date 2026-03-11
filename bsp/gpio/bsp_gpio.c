@@ -28,10 +28,12 @@ void WIFI_Weakmode_Set(uint8_t state)
     if (state == ON)
     {
         R_IOPORT_PinWrite(&g_ioport_ctrl, WIFI_WAKE, BSP_IO_LEVEL_LOW);
+        R_BSP_PinWrite(WIFI_RESET, BSP_IO_LEVEL_HIGH);
     }
     else if (state == OFF)
     {
         R_IOPORT_PinWrite(&g_ioport_ctrl, WIFI_WAKE, BSP_IO_LEVEL_HIGH);
+        R_BSP_PinWrite(WIFI_RESET, BSP_IO_LEVEL_LOW);
     }
 }
 

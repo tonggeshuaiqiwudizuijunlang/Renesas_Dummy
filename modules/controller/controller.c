@@ -277,3 +277,19 @@ float PID_increment(PIDInstance *PID, float measure, float ref)
     return PID->Output;
 }
 
+// 带约束的版本（将输出限制在目标范围内）
+float map_float_clamp(float x, float in_min, float in_max, float out_min, float out_max) 
+{
+    // 先约束输入值在输入范围内
+    if (x < in_min) x = in_min;
+    if (x > in_max) x = in_max;
+    
+    // 执行映射
+    float result = out_min + (x - in_min) * (out_max - out_min) / (in_max - in_min);
+    
+    // 约束输出值在输出范围内（防止浮点误差）
+    if (result < out_min) result = out_min;
+    if (result > out_max) result = out_max;
+    
+    return result;
+}
