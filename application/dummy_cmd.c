@@ -4,8 +4,25 @@
 #include "bluetooth.h"
 #include "serial_debug.h"
 #include "vision.h"
+#include "dummy_motormatic.h"
 
 #define REMOTE_JOINT_GAIN 0.0003f
+#define REMOTE_KNOB_RANGE ((float)(FS_DATA_DOWN - FS_DATA_MIN))
+#define REMOTE_KNOB_HALF (REMOTE_KNOB_RANGE / 2.0f)
+
+#define ARM_HOME_JOINT1 0.0f
+#define ARM_HOME_JOINT2 0.0f
+#define ARM_HOME_JOINT3 0.0f
+#define ARM_HOME_JOINT4 0.0f
+#define ARM_HOME_JOINT5 0.0f
+#define ARM_HOME_JOINT6 0.0f
+
+#define ARM_SEVEN_JOINT1 0.0f
+#define ARM_SEVEN_JOINT2 75.0f
+#define ARM_SEVEN_JOINT3 90.0f
+#define ARM_SEVEN_JOINT4 0.0f
+#define ARM_SEVEN_JOINT5 0.0f
+#define ARM_SEVEN_JOINT6 0.0f
 
 FS_ctrl_t *fs_data;
 Publisher_t *dummy_cmd_pub;           // 控制消息发布者
@@ -15,6 +32,7 @@ Dummy_Upload_Data_s dummy_fetch_data; // 反馈数据缓存
 
 Transmit_Data_s vision_tx_data;  // 发送给上位机的数据缓存
 Received_Data_s *vision_rx_data; // 从上位机接收的数据缓存
+DOF6Kinematic_Handle_t *cmd_kinematic_handle;
 
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
 RX_BT_Data_s *bt_rx_data;
@@ -25,6 +43,9 @@ void FS_Remote_Ctrl(void);
 void Vision_Set_FeedData(void);
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
 static void DummyCmd_Serial_Debug_Send(void);
+#if DUMMY_CMD_FKIK_TEST_ENABLE
+static void DummyCmd_FKIK_Test_Send(void);
+#endif
 #endif
 static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd);
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
@@ -40,6 +61,7 @@ void DummyCmd_Init(void)
     Serial_Debug_Init(&bt_uart_ctrl, &bt_uart_cfg);
 #endif
     vision_rx_data = Vision_Init(&pc_uart_ctrl, &pc_uart_cfg);
+    cmd_kinematic_handle = Dummy_Motormatic_GetKinematicHandle();
     fs_data = FSControlInit(&sbus_ctrl, &sbus_cfg);
     dummy_cmd_pub = PubRegister("dummy_cmd", sizeof(Dummy_Ctrl_Cmd_s));
     dummy_feed_sub = SubRegister("dummy_feed", sizeof(Dummy_Upload_Data_s));
@@ -51,7 +73,11 @@ void DummyCmd_Task(void)
     FS_Remote_Ctrl();
     Vision_Set_FeedData();
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
+#if DUMMY_CMD_FKIK_TEST_ENABLE
+    DummyCmd_FKIK_Test_Send();
+#else
     DummyCmd_Serial_Debug_Send();
+#endif
 #endif
     // Bt_Set_FeedData();
     PubPushMessage(dummy_cmd_pub, (void *)&dummy_cmd_send);
@@ -59,59 +85,107 @@ void DummyCmd_Task(void)
 
 void FS_Remote_Ctrl(void)
 {
+    float gripper_angle = map_float_clamp(fs_data[TEMP].knob_l, 0.0f, REMOTE_KNOB_RANGE, 0.0f, 360.0f);
 
+    // 优先级1：R2为急停开关，只要拨到DOWN就直接进入零力模式，其他控制全部不再处理
     if (fs_data[TEMP].switch_r2 == FS_SW_DOWN)
     {
         dummy_cmd_send.arm_mode = ARM_ZERO_FORCE;
+        return;
     }
-    else if (fs_data[TEMP].switch_r2 == FS_SW_MID)
+    // R2拨到UP时才允许正常控制，先恢复夹爪的基础控制命令
+    else
     {
-        dummy_cmd_send.arm_mode = ARM_FREE_MODE;
-        // 当左侧拨杆状态发生变化时，根据当前状态刷新夹爪命令
-        if (fs_data[TEMP].switch_l1 != fs_data[LAST].switch_l1)
+        // 右旋钮：前半段保持普通夹爪控制，超过一半则启动自动夹爪程序
+        if (fs_data[TEMP].knob_r > REMOTE_KNOB_HALF)
         {
+            dummy_cmd_send.gripper_mode = GRIPPER_AUTO_GRAB;
+        }
+        else
+        {
+            dummy_cmd_send.gripper_mode = GRIPPER_MANUAL_GRAB;
+            // 左旋钮：夹爪绝对位置，映射到0~360度，给下游手动夹爪控制使用
+            dummy_cmd_send.gripper_current = gripper_angle;
+        }
+        // 优先级2：R1为强制点位开关，用于快速回到安全预设点
+        // R1_MID：强行回到0点；R1_DOWN：强行回到“7”字形点；R1_UP：正常控制
+        // 这里使用ARM_PC_MODE下发6个关节目标，避免大小臂模式只控制部分关节
+        if (fs_data[TEMP].switch_r1 == FS_SW_MID)
+        {
+            dummy_cmd_send.arm_mode = ARM_PC_MODE;
+            dummy_cmd_send.joint1_angle = ARM_HOME_JOINT1;
+            dummy_cmd_send.joint2_angle = ARM_HOME_JOINT2;
+            dummy_cmd_send.joint3_angle = ARM_HOME_JOINT3;
+            dummy_cmd_send.joint4_angle = ARM_HOME_JOINT4;
+            dummy_cmd_send.joint5_angle = ARM_HOME_JOINT5;
+            dummy_cmd_send.joint6_angle = ARM_HOME_JOINT6;
+            return;
+        }
+        else if (fs_data[TEMP].switch_r1 == FS_SW_DOWN)
+        {
+            dummy_cmd_send.arm_mode = ARM_PC_MODE;
+            dummy_cmd_send.joint1_angle = ARM_SEVEN_JOINT1;
+            dummy_cmd_send.joint2_angle = ARM_SEVEN_JOINT2;
+            dummy_cmd_send.joint3_angle = ARM_SEVEN_JOINT3;
+            dummy_cmd_send.joint4_angle = ARM_SEVEN_JOINT4;
+            dummy_cmd_send.joint5_angle = ARM_SEVEN_JOINT5;
+            dummy_cmd_send.joint6_angle = ARM_SEVEN_JOINT6;
+            return;
+        }
+        // 优先级3：L2为控制方式选择开关
+        // L2_DOWN：PC上位机控制，直接使用视觉/上位机给出的目标角度
+        if (fs_data[TEMP].switch_l2 == FS_SW_DOWN)
+        {
+            dummy_cmd_send.arm_mode = ARM_PC_MODE;
+            dummy_cmd_send.joint1_angle = -vision_rx_data->joint1;
+            dummy_cmd_send.joint2_angle = -vision_rx_data->joint2 + 75.0f;
+            dummy_cmd_send.joint3_angle = -vision_rx_data->joint3 + 90.0f;
+            dummy_cmd_send.joint4_angle = vision_rx_data->joint4;
+            dummy_cmd_send.joint5_angle = -vision_rx_data->joint5;
+            dummy_cmd_send.joint6_angle = vision_rx_data->joint6;
+
+        }
+        // L2_MID：自定义控制器控制，目前保持自由模式，不叠加遥控器摇杆量
+        else if (fs_data[TEMP].switch_l2 == FS_SW_MID)
+        {
+#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
+            dummy_cmd_send.arm_mode = ARM_CUSTOM_MODE;
+            dummy_cmd_send.joint1_angle = bt_rx_data->joint1;
+            dummy_cmd_send.joint2_angle = bt_rx_data->joint2;
+            dummy_cmd_send.joint3_angle = bt_rx_data->joint3;
+            dummy_cmd_send.joint4_angle = bt_rx_data->joint4;
+            dummy_cmd_send.joint5_angle = bt_rx_data->joint5;
+            dummy_cmd_send.joint6_angle = bt_rx_data->joint6;
+#else
+            dummy_cmd_send.arm_mode = ARM_FREE_MODE;
+#endif
+
+        }
+        // L2_UP：遥控器控制，L1用于切换大臂/小臂控制
+        else if (fs_data[TEMP].switch_l2 == FS_SW_UP)
+        {
+            dummy_cmd_send.arm_mode = ARM_FREE_MODE;
+
+            // L1_DOWN：小臂控制，四个摇杆以积分方式控制joint3~joint6
             if (fs_data[TEMP].switch_l1 == FS_SW_DOWN)
             {
-                dummy_cmd_send.gripper_mode = GRIPPER_AUTO_GRAB;
+                dummy_cmd_send.arm_ctrl_mode = SMALL_ARM_CTRL;
+                dummy_cmd_send.joint3_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l1);
+                dummy_cmd_send.joint4_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l_);
+                dummy_cmd_send.joint5_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r1);
+                dummy_cmd_send.joint6_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r_);
             }
+            // L1_UP：大臂控制，四个摇杆以积分方式控制joint1~joint4
             else
             {
-                dummy_cmd_send.gripper_mode = GRIPPER_RELEASE; // 其他摇杆状态下松开夹爪
+                dummy_cmd_send.arm_ctrl_mode = BIG_ARM_CTRL;
+                dummy_cmd_send.joint1_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r_);
+                dummy_cmd_send.joint2_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r1);
+                dummy_cmd_send.joint3_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l1);
+                dummy_cmd_send.joint4_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l_);
             }
         }
-
-        if (fs_data[TEMP].switch_l1 == FS_SW_DOWN)
-        {
-            // 通过摇杆控制发送自动抓取命令给下游处理
-        }
-        else if (fs_data[TEMP].switch_l1 == FS_SW_MID)
-        {
-            dummy_cmd_send.arm_ctrl_mode = SMALL_ARM_CTRL;
-            dummy_cmd_send.joint3_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l1);
-            dummy_cmd_send.joint4_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l_);
-            dummy_cmd_send.joint5_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r1);
-            dummy_cmd_send.joint6_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r_);
-        }
-        else if (fs_data[TEMP].switch_l1 == FS_SW_UP)
-        {
-            dummy_cmd_send.arm_ctrl_mode = BIG_ARM_CTRL;
-            dummy_cmd_send.joint1_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r_);
-            dummy_cmd_send.joint2_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_r1);
-            dummy_cmd_send.joint3_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l1);
-            dummy_cmd_send.joint4_angle += (float)(REMOTE_JOINT_GAIN * fs_data[TEMP].rocker_l_);
-        }
     }
-    else if (fs_data[TEMP].switch_r2 == FS_SW_UP)
-    {
-        dummy_cmd_send.arm_mode = ARM_PC_MODE;
-        dummy_cmd_send.joint1_angle = -vision_rx_data->joint1;
-        dummy_cmd_send.joint2_angle = -vision_rx_data->joint2 + 75.0f;
-        dummy_cmd_send.joint3_angle = -vision_rx_data->joint3 + 90.0f;
-        dummy_cmd_send.joint4_angle = vision_rx_data->joint4;
-        dummy_cmd_send.joint5_angle = -vision_rx_data->joint5;
-        dummy_cmd_send.joint6_angle = vision_rx_data->joint6;
-    }
-
     limit_joint_angles(&dummy_cmd_send);
 }
 
@@ -121,10 +195,10 @@ static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd)
     // joint_min_limit: {0, 0, 0,  0,   0,   0}
     // joint_max_limit: {340, 155, 215, 360, 240, 720}
 
-    // if (cmd->joint1_angle < -170.0f)
-    //     cmd->joint1_angle = -170.0f;
-    // if (cmd->joint1_angle > 170.0f)
-    //     cmd->joint1_angle = 170.0f;
+    if (cmd->joint1_angle < -175.0f)
+        cmd->joint1_angle = -175.0f;
+    if (cmd->joint1_angle > 175.0f)
+        cmd->joint1_angle = 175.0f;
 
     if (cmd->joint2_angle < -30.0f)
         cmd->joint2_angle = -30.0f;
@@ -179,6 +253,52 @@ static void DummyCmd_Serial_Debug_Send(void)
 
     Serial_Debug_SendFloatArray(channels, SERIAL_DEBUG_JUSTFLOAT_CHANNELS);
 }
+#if DUMMY_CMD_FKIK_TEST_ENABLE
+static void DummyCmd_FKIK_Test_Send(void)
+{
+    static uint16_t send_div_count = 0;
+
+    send_div_count++;
+    if (send_div_count < DUMMY_CMD_FKIK_TEST_SEND_DIV)
+        return;
+    send_div_count = 0;
+
+    if (cmd_kinematic_handle == NULL)
+        return;
+
+    Joint6D_t test_joints = {{30.0f, 20.0f, 40.0f, 10.0f, 20.0f, 30.0f}};
+    Pose6D_t test_pose;
+    IKSolves_t test_solves;
+    Joint6D_t output_joints = test_joints;
+
+    if (!Kinematic_SolveFK(cmd_kinematic_handle, &test_joints, &test_pose))
+        return;
+
+    if (Kinematic_SolveIK(cmd_kinematic_handle, &test_pose, &test_joints, &test_solves))
+    {
+        int best_index = Kinematic_Select_Best_Sol(cmd_kinematic_handle, &test_solves, &test_joints);
+        if (best_index >= 0)
+            output_joints = test_solves.config[best_index];
+    }
+
+    float channels[SERIAL_DEBUG_JUSTFLOAT_CHANNELS] = {
+        output_joints.a[0],
+        output_joints.a[1],
+        output_joints.a[2],
+        output_joints.a[3],
+        output_joints.a[4],
+        output_joints.a[5],
+        test_pose.X,
+        test_pose.Y,
+        test_pose.Z,
+        test_pose.A,
+        test_pose.B,
+        test_pose.C,
+    };
+
+    Serial_Debug_SendFloatArray(channels, SERIAL_DEBUG_JUSTFLOAT_CHANNELS);
+}
+#endif
 #endif
 
 void Vision_Set_FeedData(void)

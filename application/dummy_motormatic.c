@@ -19,6 +19,11 @@ Pose6D_t target_pose;                // 期望目标位姿
 Joint_Angle_State_t joint_angle;
 Gripper_Config_t gripper_config;     // 夹爪配置结构体
 
+DOF6Kinematic_Handle_t *Dummy_Motormatic_GetKinematicHandle(void)
+{
+    return &kinematic_handle;
+}
+
 void Dummy_Joint_Update(void)
 {
     Joint_Motor_Check_Connection();
@@ -112,7 +117,8 @@ void Dummy_Motormatic_Task(void)
             Joint_Motor_Set_Pos_With_SpeedLimit(6, dummy_cmd_data.joint6_angle, 30.0f);
         }
     }
-    else if (dummy_cmd_data.arm_mode == ARM_PC_MODE)
+    else if ((dummy_cmd_data.arm_mode == ARM_PC_MODE) ||
+             (dummy_cmd_data.arm_mode == ARM_CUSTOM_MODE))
     {
         Joint_Motor_Set_Pos_With_SpeedLimit(1, dummy_cmd_data.joint1_angle, 20.0f);
         Joint_Motor_Set_Pos_With_SpeedLimit(2, dummy_cmd_data.joint2_angle, 20.0f);
@@ -122,7 +128,14 @@ void Dummy_Motormatic_Task(void)
         Joint_Motor_Set_Pos_With_SpeedLimit(6, dummy_cmd_data.joint6_angle, 20.0f);
     }
     Dummy_Joint_Update();
-    // 定期执行夹爪防错状态机，传入结构体配置以及模式枚举
-    Joint_Motor_Gripper_Task(&gripper_config, dummy_cmd_data.gripper_mode);
+    if (dummy_cmd_data.gripper_mode == GRIPPER_MANUAL_GRAB)
+    {
+        Joint_Motor_Set_Pos_With_SpeedLimit(7, dummy_cmd_data.gripper_current, gripper_config.speed_limit);
+    }
+    else
+    {
+        // 定期执行夹爪防错状态机，传入结构体配置以及模式枚举
+        Joint_Motor_Gripper_Task(&gripper_config, dummy_cmd_data.gripper_mode);
+    }
     PubPushMessage(dummy_motormatic_pub, &dummy_feed_data);
 }

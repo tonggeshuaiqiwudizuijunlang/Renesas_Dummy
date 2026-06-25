@@ -11,6 +11,6 @@ void motor_ctrl_task_entry(void *pvParameters)
     while (1)
     {
         Dummy_Motormatic_Task();
-        vTaskDelay(20);
+        vTaskDelay(5);
     }
 }

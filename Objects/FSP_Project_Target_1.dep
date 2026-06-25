@@ -151,7 +151,7 @@ I (ra\fsp\inc\api\r_usb_pcdc_api.h)(0x693C416C)
 I (ra\fsp\inc\instances\r_canfd.h)(0x693C416A)
 I (ra_cfg\fsp_cfg\r_canfd_cfg.h)(0x699664CD)
 I (ra\fsp\inc\api\r_can_api.h)(0x693C416A)
-I (application\dummy_cmd.h)(0x6A3BF6F0)
+I (application\dummy_cmd.h)(0x6A3D063C)
 I (modules\motor_def.h)(0x69A9A07C)
 I (modules\controller\controller.h)(0x69AA80D9)
 I (bsp\can\bsp_can.h)(0x698578D7)
@@ -159,7 +159,7 @@ I (bsp\dwt\bsp_dwt.h)(0x69857C0D)
 I (modules\step_motor\step_motor.h)(0x69B16033)
 I (modules\daemon\daemon.h)(0x69829AD7)
 I (modules\message_center\message_center.h)(0x699471E4)
-I (modules\robot_types.h)(0x6A3CA985)
+I (modules\robot_types.h)(0x6A3CC6E7)
 I (modules\dummy_kinematic\dummy_kinematic_v2.h)(0x6A3A7649)
 F (.\src\daemon_task_entry.c)(0x69AAA4E2)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/daemon_task_entry.o -MMD)
 I (ra_gen\daemon_task.h)(0x69914078)
@@ -240,7 +240,7 @@ I (ra\fsp\inc\api\r_can_api.h)(0x693C416A)
 I (modules\daemon\daemon.h)(0x69829AD7)
 I (modules\vision\vision.h)(0x69C711C6)
 I (bsp\uart\bsp_uart.h)(0x69AC5748)
-F (.\src\motor_ctrl_task_entry.c)(0x69AAE23B)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/motor_ctrl_task_entry.o -MMD)
+F (.\src\motor_ctrl_task_entry.c)(0x6A3D20AE)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/motor_ctrl_task_entry.o -MMD)
 I (ra_gen\motor_ctrl_task.h)(0x698265C3)
 I (ra\fsp\inc\api\bsp_api.h)(0x693C416A)
 I (ra\fsp\inc\api\fsp_common_api.h)(0x693C416A)
@@ -316,8 +316,8 @@ I (ra\fsp\inc\api\r_usb_pcdc_api.h)(0x693C416C)
 I (ra\fsp\inc\instances\r_canfd.h)(0x693C416A)
 I (ra_cfg\fsp_cfg\r_canfd_cfg.h)(0x699664CD)
 I (ra\fsp\inc\api\r_can_api.h)(0x693C416A)
-I (application\dummy_motormatic.h)(0x699A86C8)
-I (modules\robot_types.h)(0x6A3CA985)
+I (application\dummy_motormatic.h)(0x6A3D0B95)
+I (modules\robot_types.h)(0x6A3CC6E7)
 I (modules\step_motor\step_motor.h)(0x69B16033)
 I (bsp\dwt\bsp_dwt.h)(0x69857C0D)
 I (bsp\can\bsp_can.h)(0x698578D7)
@@ -933,7 +933,7 @@ I (modules\daemon\daemon.h)(0x69829AD7)
 I (modules\motor_def.h)(0x69A9A07C)
 I (modules\controller\controller.h)(0x69AA80D9)
 I (modules\message_center\message_center.h)(0x699471E4)
-I (modules\robot_types.h)(0x6A3CA985)
+I (modules\robot_types.h)(0x6A3CC6E7)
 I (modules\dummy_kinematic\dummy_kinematic_v2.h)(0x6A3A7649)
 F (.\modules\step_motor\step_motor.h)(0x69B16033)()
 F (.\modules\daemon\daemon.c)(0x69829AC8)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/daemon.o -MMD)
@@ -1018,8 +1018,8 @@ F (.\modules\motor_def.h)(0x69A9A07C)()
 F (.\modules\message_center\message_center.c)(0x6994715E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/message_center.o -MMD)
 I (modules\message_center\message_center.h)(0x699471E4)
 F (.\modules\message_center\message_center.h)(0x699471E4)()
-F (.\modules\remote\mc6c.c)(0x69AA9C39)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/mc6c.o -MMD)
-I (modules\remote\mc6c.h)(0x69AA9901)
+F (.\modules\remote\flysky.c)(0x6A3CBAF7)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/flysky.o -MMD)
+I (modules\remote\flysky.h)(0x6A3CBA91)
 I (bsp\uart\bsp_uart.h)(0x69AC5748)
 I (ra_gen\hal_data.h)(0x69B454B3)
 I (ra\fsp\inc\api\bsp_api.h)(0x693C416A)
@@ -1096,7 +1096,7 @@ I (ra\fsp\inc\instances\r_canfd.h)(0x693C416A)
 I (ra_cfg\fsp_cfg\r_canfd_cfg.h)(0x699664CD)
 I (ra\fsp\inc\api\r_can_api.h)(0x693C416A)
 I (modules\daemon\daemon.h)(0x69829AD7)
-F (.\modules\remote\mc6c.h)(0x69AA9901)()
+F (.\modules\remote\flysky.h)(0x6A3CBA91)()
 F (.\modules\dummy_kinematic\dummy_kinematic_v2.c)(0x6A3A76BD)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/dummy_kinematic_v2.o -MMD)
 I (modules\dummy_kinematic\dummy_kinematic_v2.h)(0x6A3A7649)
 I (modules\motor_def.h)(0x69A9A07C)
@@ -1181,7 +1181,7 @@ I (modules\step_motor\step_motor.h)(0x69B16033)
 I (modules\daemon\daemon.h)(0x69829AD7)
 I (modules\message_center\message_center.h)(0x699471E4)
 F (.\modules\dummy_kinematic\dummy_kinematic_v2.h)(0x6A3A7649)()
-F (.\modules\robot_types.h)(0x6A3CA985)()
+F (.\modules\robot_types.h)(0x6A3CC6E7)()
 F (.\modules\vision\vision.c)(0x69AABCB0)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/vision.o -MMD)
 I (modules\vision\vision.h)(0x69C711C6)
 I (bsp\uart\bsp_uart.h)(0x69AC5748)
@@ -1419,8 +1419,8 @@ I (ra\fsp\inc\instances\r_canfd.h)(0x693C416A)
 I (ra_cfg\fsp_cfg\r_canfd_cfg.h)(0x699664CD)
 I (ra\fsp\inc\api\r_can_api.h)(0x693C416A)
 F (.\modules\serial_debug\serial_debug.h)(0x6A3BB188)()
-F (.\application\dummy_cmd.c)(0x6A3CA9DE)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/dummy_cmd.o -MMD)
-I (application\dummy_cmd.h)(0x6A3BF6F0)
+F (.\application\dummy_cmd.c)(0x6A3D0C0E)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/dummy_cmd.o -MMD)
+I (application\dummy_cmd.h)(0x6A3D063C)
 I (modules\motor_def.h)(0x69A9A07C)
 I (modules\controller\controller.h)(0x69AA80D9)
 I (bsp\can\bsp_can.h)(0x698578D7)
@@ -1502,17 +1502,18 @@ I (bsp\dwt\bsp_dwt.h)(0x69857C0D)
 I (modules\step_motor\step_motor.h)(0x69B16033)
 I (modules\daemon\daemon.h)(0x69829AD7)
 I (modules\message_center\message_center.h)(0x699471E4)
-I (modules\robot_types.h)(0x6A3CA985)
+I (modules\robot_types.h)(0x6A3CC6E7)
 I (modules\dummy_kinematic\dummy_kinematic_v2.h)(0x6A3A7649)
-I (modules\remote\mc6c.h)(0x69AA9901)
+I (modules\remote\flysky.h)(0x6A3CBA91)
 I (bsp\uart\bsp_uart.h)(0x69AC5748)
 I (modules\bluetooth\bluetooth.h)(0x69B45876)
 I (modules\serial_debug\serial_debug.h)(0x6A3BB188)
 I (modules\vision\vision.h)(0x69C711C6)
-F (.\application\dummy_cmd.h)(0x6A3BF6F0)()
-F (.\application\dummy_motormatic.c)(0x6A3CA9C0)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/dummy_motormatic.o -MMD)
-I (application\dummy_motormatic.h)(0x699A86C8)
-I (modules\robot_types.h)(0x6A3CA985)
+I (application\dummy_motormatic.h)(0x6A3D0B95)
+F (.\application\dummy_cmd.h)(0x6A3D063C)()
+F (.\application\dummy_motormatic.c)(0x6A3D0BBB)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/dummy_motormatic.o -MMD)
+I (application\dummy_motormatic.h)(0x6A3D0B95)
+I (modules\robot_types.h)(0x6A3CC6E7)
 I (modules\step_motor\step_motor.h)(0x69B16033)
 I (bsp\dwt\bsp_dwt.h)(0x69857C0D)
 I (ra\arm\CMSIS_6\CMSIS\Core\Include\cmsis_compiler.h)(0x693C3FFA)
@@ -1595,87 +1596,8 @@ I (modules\motor_def.h)(0x69A9A07C)
 I (modules\controller\controller.h)(0x69AA80D9)
 I (modules\message_center\message_center.h)(0x699471E4)
 I (modules\dummy_kinematic\dummy_kinematic_v2.h)(0x6A3A7649)
-I (application\dummy_cmd.h)(0x6A3BF6F0)
-F (.\application\dummy_motormatic.h)(0x699A86C8)()
-F (.\application\dummy_vision.c)(0x69A98A35)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/dummy_vision.o -MMD)
-I (application\dummy_vision.h)(0x69A989C9)
-I (modules\vision\vision.h)(0x69C711C6)
-I (bsp\uart\bsp_uart.h)(0x69AC5748)
-I (ra_gen\hal_data.h)(0x69B454B3)
-I (ra\fsp\inc\api\bsp_api.h)(0x693C416A)
-I (ra\fsp\inc\api\fsp_common_api.h)(0x693C416A)
-I (ra\fsp\inc\fsp_version.h)(0x693C416A)
-I (ra_cfg\fsp_cfg\bsp\bsp_cfg.h)(0x6983A87C)
-I (ra_gen\bsp_clock_cfg.h)(0x69A94ED5)
-I (ra_cfg\fsp_cfg\bsp\bsp_mcu_family_cfg.h)(0x69B454B3)
-I (ra_cfg\fsp_cfg\bsp\bsp_mcu_device_pn_cfg.h)(0x697FDD7E)
-I (ra_cfg\fsp_cfg\bsp\bsp_mcu_device_cfg.h)(0x697FDD7E)
-I (ra_cfg\fsp_cfg\bsp\..\..\..\ra\fsp\src\bsp\mcu\ra6m5\bsp_mcu_info.h)(0x693C419A)
-I (ra_cfg\fsp_cfg\bsp\..\..\..\ra\fsp\src\bsp\mcu\ra6m5\bsp_elc.h)(0x693C419A)
-I (ra_cfg\fsp_cfg\bsp\..\..\..\ra\fsp\src\bsp\mcu\ra6m5\bsp_feature.h)(0x693C419A)
-I (ra_cfg\fsp_cfg\bsp\..\..\..\ra\fsp\src\bsp\mcu\ra6m5\bsp_peripheral.h)(0x693C419A)
-I (ra_cfg\fsp_cfg\bsp\bsp_mcu_ofs_cfg.h)(0x697FDD7E)
-I (ra_cfg\fsp_cfg\bsp\board_cfg.h)(0x697FDD7E)
-I (ra_gen\vector_data.h)(0x69B454B3)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_exceptions.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\cmsis\Device\RENESAS\Include\renesas.h)(0x693C416A)
-I (ra\arm\CMSIS_6\CMSIS\Core\Include\cmsis_compiler.h)(0x693C3FFA)
-I (ra\arm\CMSIS_6\CMSIS\Core\Include\cmsis_armclang.h)(0x693C3FFA)
-I (ra\fsp\inc\api\..\..\src\bsp\cmsis\Device\RENESAS\Include\R7FA6M5BH.h)(0x693C419A)
-I (ra\arm\CMSIS_6\CMSIS\Core\Include\core_cm33.h)(0x693C3FFA)
-I (ra\fsp\inc\api\..\..\src\bsp\cmsis\Device\RENESAS\Include\system.h)(0x693C416A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_common.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\inc\api\fsp_common_api.h)(0x693C416A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_compiler_support.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_tfu.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_sdram.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_mmf.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_ipc.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_ospi_b.h)(0x693C419A)
-I (C:\Users\Xiong Sir\Desktop\Renesas_Dummy\bsp_linker_info.h)(0x697FDD7E)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_register_protection.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_irq.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_io.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_group_irq.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_clocks.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_module_stop.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_security.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\inc\fsp_features.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\inc\..\..\fsp\src\bsp\mcu\all\bsp_compiler_support.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_delay.h)(0x693C419A)
-I (ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_mcu_api.h)(0x693C419A)
-I (ra_gen\common_data.h)(0x697FDD7E)
-I (ra\fsp\inc\instances\r_ioport.h)(0x693C416A)
-I (ra\fsp\inc\api\r_ioport_api.h)(0x693C416A)
-I (ra_cfg\fsp_cfg\r_ioport_cfg.h)(0x697FDD7E)
-I (ra_cfg\fsp_cfg\bsp\bsp_pin_cfg.h)(0x69914076)
-I (ra\fsp\inc\instances\r_dtc.h)(0x693C416A)
-I (ra\fsp\inc\api\r_transfer_api.h)(0x693C416A)
-I (ra_cfg\fsp_cfg\r_dtc_cfg.h)(0x699027AB)
-I (ra\fsp\inc\instances\r_sci_uart.h)(0x693C416A)
-I (ra\fsp\inc\api\r_uart_api.h)(0x693C416C)
-I (ra_cfg\fsp_cfg\r_sci_uart_cfg.h)(0x699027AB)
-I (ra\fsp\inc\instances\r_usb_basic.h)(0x693C416A)
-I (ra_cfg\fsp_cfg\r_usb_basic_cfg.h)(0x69A94ED7)
-I (ra\fsp\inc\api\r_usb_basic_api.h)(0x693C416A)
-I (ra\fsp\inc\api\..\..\src\r_usb_basic\src\driver\inc\r_usb_basic_define.h)(0x693C416A)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\FreeRTOS.h)(0x693C3FFA)
-I (ra_cfg\aws\FreeRTOSConfig.h)(0x69A94ED7)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\projdefs.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\portable.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\deprecated_definitions.h)(0x693C3FFA)
-I (ra\fsp\src\rm_freertos_port\portmacro.h)(0x693C3FF6)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\mpu_wrappers.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\task.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\list.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\queue.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\timers.h)(0x693C3FFA)
-I (ra\aws\FreeRTOS\FreeRTOS\Source\include\semphr.h)(0x693C3FFA)
-I (ra\fsp\inc\api\r_usb_pcdc_api.h)(0x693C416C)
-I (ra\fsp\inc\instances\r_canfd.h)(0x693C416A)
-I (ra_cfg\fsp_cfg\r_canfd_cfg.h)(0x699664CD)
-I (ra\fsp\inc\api\r_can_api.h)(0x693C416A)
-F (.\application\dummy_vision.h)(0x69A989C9)()
+I (application\dummy_cmd.h)(0x6A3D063C)
+F (.\application\dummy_motormatic.h)(0x6A3D0B95)()
 F (C:/Users/Xiong Sir/Desktop/Renesas_Dummy/ra/aws/FreeRTOS/FreeRTOS/Source/event_groups.c)(0x693C3FFA)(-xc -std=c99 --target=arm-arm-none-eabi -mcpu=cortex-m33 -mfpu=fpv5-sp-d16 -mfloat-abi=hard -c-fno-rtti -funsigned-char-D__MICROLIB -gdwarf-4 -O0 -ffunction-sections -I ../keil_test -I ./ra -I ./ra_cfg -I ./ra_gen -I ./bsp -I ./bsp/dwt -I ./bsp/can -I ./bsp/uart -I ./bsp/gpio -I ./bsp/usb -I ./modules -I ./modules/daemon -I ./modules/controller -I ./modules/step_motor -I ./modules/wifi -I ./modules/bluetooth -I ./modules/message_center -I ./modules/dummy_kinematic -I ./modules/bluetooth -I ./modules/vision -I ./modules/remote -I ./modules/serial_debug -I ./application -I ./src @./via/rasc_armclang.via-I./RTE/_Target_1-I./ra/arm/CMSIS_6/CMSIS/Core/Include-I./ra/aws/FreeRTOS/FreeRTOS/Source/include-I./ra/fsp/inc-I./ra/fsp/inc/api-I./ra/fsp/inc/instances-I./ra/fsp/src/r_usb_basic/src/driver/inc-I./ra/fsp/src/rm_freertos_port-I./ra_cfg/aws-I./ra_cfg/fsp_cfg-I./ra_cfg/fsp_cfg/bsp-I./ra_gen-I"C:/Users/Xiong Sir/Desktop/Renesas_Dummy"-D__UVISION_VERSION="542" -D_RTE_-o ./objects/event_groups.o -MMD)
 I (ra\aws\FreeRTOS\FreeRTOS\Source\include\FreeRTOS.h)(0x693C3FFA)
 I (ra_cfg\aws\FreeRTOSConfig.h)(0x69A94ED7)

@@ -11,7 +11,8 @@ typedef enum
 {
     ARM_ZERO_FORCE = 0,
     ARM_FREE_MODE,
-    ARM_PC_MODE // 上位机模式
+    ARM_PC_MODE,        // 上位机模式
+    ARM_CUSTOM_MODE     // 自定义控制器/蓝牙控制模式
 } arm_mode_e;
 
 typedef enum

@@ -1,6 +1,5 @@
-./objects/dummy_cmd.o: application\dummy_cmd.c application\dummy_cmd.h \
-  modules\motor_def.h modules\controller\controller.h bsp\can\bsp_can.h \
-  ra_gen\hal_data.h ra\fsp\inc\api\bsp_api.h \
+./objects/flysky.o: modules\remote\flysky.c modules\remote\flysky.h \
+  bsp\uart\bsp_uart.h ra_gen\hal_data.h ra\fsp\inc\api\bsp_api.h \
   ra\fsp\inc\api\fsp_common_api.h ra\fsp\inc\fsp_version.h \
   ra_cfg\fsp_cfg\bsp\bsp_cfg.h ra_gen\bsp_clock_cfg.h \
   ra_cfg\fsp_cfg\bsp\bsp_mcu_family_cfg.h \
@@ -61,9 +60,4 @@
   ra\aws\FreeRTOS\FreeRTOS\Source\include\semphr.h \
   ra\fsp\inc\api\r_usb_pcdc_api.h ra\fsp\inc\instances\r_canfd.h \
   ra_cfg\fsp_cfg\r_canfd_cfg.h ra\fsp\inc\api\r_can_api.h \
-  bsp\dwt\bsp_dwt.h modules\step_motor\step_motor.h \
-  modules\daemon\daemon.h modules\message_center\message_center.h \
-  modules\robot_types.h modules\dummy_kinematic\dummy_kinematic_v2.h \
-  modules\remote\flysky.h bsp\uart\bsp_uart.h \
-  modules\bluetooth\bluetooth.h modules\serial_debug\serial_debug.h \
-  modules\vision\vision.h application\dummy_motormatic.h
+  modules\daemon\daemon.h

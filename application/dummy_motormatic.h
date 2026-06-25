@@ -15,4 +15,6 @@
 void Dummy_Motormatic_Init(void);
 void Dummy_Motormatic_Task(void);
 
+DOF6Kinematic_Handle_t *Dummy_Motormatic_GetKinematicHandle(void);
+
 #endif
