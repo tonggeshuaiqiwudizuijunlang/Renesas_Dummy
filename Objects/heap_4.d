@@ -1,5 +1,5 @@
 ./objects/heap_4.o: \
-  C:\Users\Xiong\ Sir\Desktop\keil_test\ra\aws\FreeRTOS\FreeRTOS\Source\portable\MemMang\heap_4.c \
+  C:\Users\Xiong\ Sir\Desktop\Renesas_Dummy\ra\aws\FreeRTOS\FreeRTOS\Source\portable\MemMang\heap_4.c \
   ra\aws\FreeRTOS\FreeRTOS\Source\include\FreeRTOS.h \
   ra_cfg\aws\FreeRTOSConfig.h ra\fsp\inc\api\bsp_api.h \
   ra\fsp\inc\api\fsp_common_api.h ra\fsp\inc\fsp_version.h \
@@ -28,7 +28,7 @@
   ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_mmf.h \
   ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_ipc.h \
   ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_ospi_b.h \
-  ..\keil_test\bsp_linker_info.h \
+  C:\Users\Xiong\ Sir\Desktop\Renesas_Dummy\bsp_linker_info.h \
   ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_register_protection.h \
   ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_irq.h \
   ra\fsp\inc\api\..\..\src\bsp\mcu\all\bsp_io.h \

@@ -65,15 +65,10 @@ typedef struct
     arm_ctrl_mode_e arm_ctrl_mode;
     arm_state_e  arm_state;
     
-    // /* --- 当前末端位姿 (Current Pose) --- */
-    // float    cur_x;
-    // float    cur_y;
-    // float    cur_z;
-    
-    // float    cur_roll;
-    // float    cur_pitch;
-    // float    cur_yaw;
-    
+    /* --- 当前关节反馈和末端位姿 --- */
+    Joint6D_t current_joints_feedback;
+    Pose6D_t current_pose;
+
     /* --- 关节详细信息 --- *
     * joint_motor[0~5] 对应 Axis 1-6
     * joint_motor[6]   对应 夹爪 */

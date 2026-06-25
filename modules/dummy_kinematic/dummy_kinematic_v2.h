@@ -21,15 +21,15 @@ typedef struct {
 // 6D 位姿结构体
 typedef struct {
     float X, Y, Z;       // 位置 mm
-    float A, B, C;       // 欧拉角 (Roll, Pitch, Yaw) 度
-    float R[9];          // 旋转矩阵缓存
+    float A, B, C;       // ZYX 欧拉角: A=Roll(X), B=Pitch(Y), C=Yaw(Z), 单位: 度
+    float R[9];          // 旋转矩阵缓存 (行主序)
     bool hasR;           // 标记是否已有旋转矩阵
 } Pose6D_t;
 
 // 逆解结果集 (最多8组解)
 typedef struct {
     Joint6D_t config[8];   // 8组可能的关节角度
-    char solFlag[8][3];    // 每组解的有效性标记 (1:有效, -1:奇异/无效)
+    char solFlag[8][3];    // 解标记: [0]基座 [1]大小臂 [2]腕部; 1有效, 0无效, -1奇异但可参考
 } IKSolves_t;
 
 typedef struct {
