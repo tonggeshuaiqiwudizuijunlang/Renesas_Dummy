@@ -57,19 +57,19 @@ void Dummy_Motormatic_Init(void)
         .D_ELBOW = 52.0f,
         .L_WRIST = 72.0f,
         // --- 关节软限位 (度) ---
-        .joint_min_limit = {-170.0f, -75.0f, -30.0f, -180.0f, -120.0f, -360.0f},
-        .joint_max_limit = {170.0f, 75.0f, 180.0f, 180.0f, 120.0, 360.0f}};
+        .joint_min_limit = {-175.0f, -25.0f, 0.0f, -180.0f, -120.0f, -360.0f},
+        .joint_max_limit = {175.0f, 150.0f, 180.0f, 180.0f, 120.0f, 360.0f}};
     Kinematic_Init(&kinematic_handle, &my_arm_config);
 
     // 1. 电机配置 (减速比 + 方向 + 关节限位)
     StepMotor_Config_t motor_configs[7] = {
-        {50.0f, false, 0.0f, 340.0f}, // J1
-        {50.0f, true, 0.0f, 155.0f},  // J2
-        {50.0f, true, 0.0f, 215.0f},  // J3
-        {50.0f, true, 0.0f, 360.0f},  // J4
-        {50.0f, true, 0.0f, 240.0f},  // J5
-        {50.0f, false, 0.0f, 720.0f}, // J6
-        {8.0f, false, 0.0f, 3600.0f}   // 夹爪
+        {50.0f, false, -175.0f, 175.0f},  // J1
+        {50.0f, true,  -25.0f, 150.0f},  // J2
+        {50.0f, true,    0.0f, 180.0f},  // J3
+        {50.0f, true, -180.0f, 180.0f},  // J4
+        {50.0f, true, -120.0f, 120.0f},  // J5
+        {50.0f, false, -360.0f, 360.0f}, // J6
+        {8.0f, false, -720.0f, 720.0f}     // 夹爪
     };
     // 初始化电机驱动 (传入配置)
     Joint_Motor_Init(motor_configs);
@@ -99,33 +99,36 @@ void Dummy_Motormatic_Task(void)
         {
             Joint_Motor_Set_Current(i + 1, 0.0f);
         }
+        Dummy_Joint_Update();
+        PubPushMessage(dummy_motormatic_pub, &dummy_feed_data);
+        return;
     }
     else if (dummy_cmd_data.arm_mode == ARM_FREE_MODE)
     {
         if (dummy_cmd_data.arm_ctrl_mode == BIG_ARM_CTRL)
         {
-            Joint_Motor_Set_Pos_With_SpeedLimit(1, dummy_cmd_data.joint1_angle, 30.0f);
-            Joint_Motor_Set_Pos_With_SpeedLimit(2, dummy_cmd_data.joint2_angle, 30.0f);
-            Joint_Motor_Set_Pos_With_SpeedLimit(3, dummy_cmd_data.joint3_angle, 15.0f);
-            Joint_Motor_Set_Pos_With_SpeedLimit(4, dummy_cmd_data.joint4_angle, 30.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(1, dummy_cmd_data.joint1_angle, 50.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(2, dummy_cmd_data.joint2_angle, 50.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(3, dummy_cmd_data.joint3_angle, 50.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(4, dummy_cmd_data.joint4_angle, 50.0f);
         }
         else if (dummy_cmd_data.arm_ctrl_mode == SMALL_ARM_CTRL)
         {
-            Joint_Motor_Set_Pos_With_SpeedLimit(3, dummy_cmd_data.joint3_angle, 15.0f);
-            Joint_Motor_Set_Pos_With_SpeedLimit(4, dummy_cmd_data.joint4_angle, 30.0f);
-            Joint_Motor_Set_Pos_With_SpeedLimit(5, dummy_cmd_data.joint5_angle, 30.0f);
-            Joint_Motor_Set_Pos_With_SpeedLimit(6, dummy_cmd_data.joint6_angle, 30.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(3, dummy_cmd_data.joint3_angle, 50.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(4, dummy_cmd_data.joint4_angle, 50.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(5, dummy_cmd_data.joint5_angle, 50.0f);
+            Joint_Motor_Set_Pos_With_SpeedLimit(6, dummy_cmd_data.joint6_angle, 50.0f);
         }
     }
     else if ((dummy_cmd_data.arm_mode == ARM_PC_MODE) ||
              (dummy_cmd_data.arm_mode == ARM_CUSTOM_MODE))
     {
-        Joint_Motor_Set_Pos_With_SpeedLimit(1, dummy_cmd_data.joint1_angle, 20.0f);
-        Joint_Motor_Set_Pos_With_SpeedLimit(2, dummy_cmd_data.joint2_angle, 20.0f);
-        Joint_Motor_Set_Pos_With_SpeedLimit(3, dummy_cmd_data.joint3_angle, 20.0f);
-        Joint_Motor_Set_Pos_With_SpeedLimit(4, dummy_cmd_data.joint4_angle, 20.0f);
-        Joint_Motor_Set_Pos_With_SpeedLimit(5, dummy_cmd_data.joint5_angle, 20.0f);
-        Joint_Motor_Set_Pos_With_SpeedLimit(6, dummy_cmd_data.joint6_angle, 20.0f);
+        Joint_Motor_Set_Pos_With_SpeedLimit(1, dummy_cmd_data.joint1_angle, 30.0f);
+        Joint_Motor_Set_Pos_With_SpeedLimit(2, dummy_cmd_data.joint2_angle, 30.0f);
+        Joint_Motor_Set_Pos_With_SpeedLimit(3, dummy_cmd_data.joint3_angle, 30.0f);
+        Joint_Motor_Set_Pos_With_SpeedLimit(4, dummy_cmd_data.joint4_angle, 30.0f);
+        Joint_Motor_Set_Pos_With_SpeedLimit(5, dummy_cmd_data.joint5_angle, 30.0f);
+        Joint_Motor_Set_Pos_With_SpeedLimit(6, dummy_cmd_data.joint6_angle, 30.0f);
     }
     Dummy_Joint_Update();
     if (dummy_cmd_data.gripper_mode == GRIPPER_MANUAL_GRAB)

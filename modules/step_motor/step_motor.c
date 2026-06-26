@@ -51,6 +51,10 @@ static void Joint_Motor_Callback(CANInstance *_instance)
 
     Joint_t *joint = &dummy_joints[node_id];
     StepMotor_Config_t *joint_config = &joint_configs[node_id];
+
+    joint->is_online = true;
+    joint->last_online_time = DWT_GetTimeline_ms();
+
     switch (cmd)
     {
     case CMD_GET_CURRENT: // 0x21 Response
@@ -74,7 +78,10 @@ static void Joint_Motor_Callback(CANInstance *_instance)
         if (_instance->rx_len >= 4)
         {
             memcpy(&joint->turns, _instance->rx_buff, 4);
-            joint->reduction_angle = (joint->turns * 360.0f / joint_config->reduction_ratio); // 转换为角度
+            float reduction_angle = joint->turns * 360.0f / joint_config->reduction_ratio;
+            if (joint_config->reverse_flag)
+                reduction_angle = -reduction_angle;
+            joint->reduction_angle = reduction_angle; // 转换为统一关节角度
         }
         if (_instance->rx_len >= 5)
             joint->is_finished = _instance->rx_buff[4];
@@ -402,7 +409,12 @@ void Joint_Motor_Gripper_Task(Gripper_Config_t *config, uint8_t gripper_mode)
                 }
             }
             else
-                loop_count -= 50;
+            {
+                if (loop_count > 50)
+                    loop_count -= 50;
+                else
+                    loop_count = 0;
+            }
         }
         else if (grab_state == GRIPPER_STATE_LOCKED)
         {

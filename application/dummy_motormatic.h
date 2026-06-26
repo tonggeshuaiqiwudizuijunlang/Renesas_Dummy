@@ -4,10 +4,23 @@
 #include "robot_types.h"
 #include "dummy_kinematic_v2.h"
 
+#define REMOTE_JOINT_GAIN 0.0003f
+#define REMOTE_KNOB_RANGE ((float)(FS_DATA_DOWN - FS_DATA_MIN))
+#define REMOTE_KNOB_HALF (REMOTE_KNOB_RANGE / 2.0f)
 
+#define ARM_HOME_JOINT1 0.0f
+#define ARM_HOME_JOINT2 0.0f
+#define ARM_HOME_JOINT3 0.0f
+#define ARM_HOME_JOINT4 0.0f
+#define ARM_HOME_JOINT5 0.0f
+#define ARM_HOME_JOINT6 0.0f
 
-
-
+#define ARM_SEVEN_JOINT1 0.0f
+#define ARM_SEVEN_JOINT2 75.0f
+#define ARM_SEVEN_JOINT3 90.0f
+#define ARM_SEVEN_JOINT4 0.0f
+#define ARM_SEVEN_JOINT5 0.0f
+#define ARM_SEVEN_JOINT6 0.0f
 
 
 

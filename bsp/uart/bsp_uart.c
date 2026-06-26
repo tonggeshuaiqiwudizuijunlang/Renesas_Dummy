@@ -13,6 +13,7 @@ USARTInstance *USARTRegister(USART_Init_Config_s *init_config)
     if (idx >= DEVICE_USART_CNT) return NULL;
 
     USARTInstance *instance = (USARTInstance *)malloc(sizeof(USARTInstance));
+    if (instance == NULL) return NULL;
     memset(instance, 0, sizeof(USARTInstance));
 
     instance->p_ctrl = init_config->p_uart_ctrl;
@@ -92,9 +93,8 @@ void UART_Global_Callback(uart_callback_args_t *p_args)
 void USART_Force_Restart(USARTInstance *_instance)
 {
     if (!_instance) return;
-    // 停止旧的
-    // R_SCI_UART_Abort(_instance->p_ctrl, UART_DIR_RX);
-    // 开启新的
-    // R_SCI_UART_Read(_instance->p_ctrl, _instance->recv_buff, _instance->recv_buff_size);
+    // 停止旧的接收请求，再重新提交接收，避免串口错误后接收链路卡住
+    (void)R_SCI_UART_Abort(_instance->p_ctrl, UART_DIR_RX);
+    (void)R_SCI_UART_Read(_instance->p_ctrl, _instance->recv_buff, _instance->recv_buff_size);
 }
 

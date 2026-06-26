@@ -1,0 +1,34 @@
+{
+    // 使用 IntelliSense 了解相关属性。
+    // DAPLink v2 在调试器里一般识别为 CMSIS-DAP v2。
+    // 推荐先使用 pyOCD；如果 pyOCD 找不到 R7FA6M5BH，再试下面的 OpenOCD 配置。
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "DAPLink v2 - pyOCD",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/Objects/FSP_Project.axf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "pyocd",
+            "targetId": "R7FA6M5BH",
+            "interface": "swd",
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "raw"
+        },
+        {
+            "name": "DAPLink v2 - OpenOCD",
+            "cwd": "${workspaceFolder}",
+            "executable": "${workspaceFolder}/Objects/FSP_Project.axf",
+            "request": "launch",
+            "type": "cortex-debug",
+            "servertype": "openocd",
+            "configFiles": [
+                "interface/cmsis-dap.cfg",
+                "target/renesas_ra.cfg"
+            ],
+            "runToEntryPoint": "main",
+            "showDevDebugOutput": "raw"
+        }
+    ]
+}

@@ -6,23 +6,7 @@
 #include "vision.h"
 #include "dummy_motormatic.h"
 
-#define REMOTE_JOINT_GAIN 0.0003f
-#define REMOTE_KNOB_RANGE ((float)(FS_DATA_DOWN - FS_DATA_MIN))
-#define REMOTE_KNOB_HALF (REMOTE_KNOB_RANGE / 2.0f)
 
-#define ARM_HOME_JOINT1 0.0f
-#define ARM_HOME_JOINT2 0.0f
-#define ARM_HOME_JOINT3 0.0f
-#define ARM_HOME_JOINT4 0.0f
-#define ARM_HOME_JOINT5 0.0f
-#define ARM_HOME_JOINT6 0.0f
-
-#define ARM_SEVEN_JOINT1 0.0f
-#define ARM_SEVEN_JOINT2 75.0f
-#define ARM_SEVEN_JOINT3 90.0f
-#define ARM_SEVEN_JOINT4 0.0f
-#define ARM_SEVEN_JOINT5 0.0f
-#define ARM_SEVEN_JOINT6 0.0f
 
 FS_ctrl_t *fs_data;
 Publisher_t *dummy_cmd_pub;           // 控制消息发布者
@@ -34,23 +18,18 @@ Transmit_Data_s vision_tx_data;  // 发送给上位机的数据缓存
 Received_Data_s *vision_rx_data; // 从上位机接收的数据缓存
 DOF6Kinematic_Handle_t *cmd_kinematic_handle;
 
-#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
+SerialDebug_Instance_s *serial_debug_instance;
+
 RX_BT_Data_s *bt_rx_data;
 TX_BT_Data_s bt_tx_data;
-#endif
 
-void FS_Remote_Ctrl(void);
+
+void FS_Remote_Control(void);
 void Vision_Set_FeedData(void);
-#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
 static void DummyCmd_Serial_Debug_Send(void);
-#if DUMMY_CMD_FKIK_TEST_ENABLE
 static void DummyCmd_FKIK_Test_Send(void);
-#endif
-#endif
 static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd);
-#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
 void Bt_Set_FeedData(void);
-#endif
 
 void DummyCmd_Init(void)
 {
@@ -58,7 +37,11 @@ void DummyCmd_Init(void)
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
     bt_rx_data = BT_Init(&bt_uart_ctrl, &bt_uart_cfg);
 #elif (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
-    Serial_Debug_Init(&bt_uart_ctrl, &bt_uart_cfg);
+    SerialDebug_Init_Config_s serial_debug_config;
+    serial_debug_config.usart_config.p_uart_ctrl = &bt_uart_ctrl;
+    serial_debug_config.usart_config.p_uart_cfg = &bt_uart_cfg;
+    serial_debug_config.pid_callback = NULL;
+    serial_debug_instance = SerialDebug_Init(&serial_debug_config);
 #endif
     vision_rx_data = Vision_Init(&pc_uart_ctrl, &pc_uart_cfg);
     cmd_kinematic_handle = Dummy_Motormatic_GetKinematicHandle();
@@ -70,7 +53,7 @@ void DummyCmd_Init(void)
 void DummyCmd_Task(void)
 {
     SubGetMessage(dummy_feed_sub, &dummy_fetch_data);
-    FS_Remote_Ctrl();
+    FS_Remote_Control();
     Vision_Set_FeedData();
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
 #if DUMMY_CMD_FKIK_TEST_ENABLE
@@ -79,11 +62,14 @@ void DummyCmd_Task(void)
     DummyCmd_Serial_Debug_Send();
 #endif
 #endif
-    // Bt_Set_FeedData();
+
+#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
+    Bt_Set_FeedData();
+#endif
     PubPushMessage(dummy_cmd_pub, (void *)&dummy_cmd_send);
 }
 
-void FS_Remote_Ctrl(void)
+void FS_Remote_Control(void)
 {
     float gripper_angle = map_float_clamp(fs_data[TEMP].knob_l, 0.0f, REMOTE_KNOB_RANGE, 0.0f, 360.0f);
 
@@ -108,9 +94,9 @@ void FS_Remote_Ctrl(void)
             dummy_cmd_send.gripper_current = gripper_angle;
         }
         // 优先级2：R1为强制点位开关，用于快速回到安全预设点
-        // R1_MID：强行回到0点；R1_DOWN：强行回到“7”字形点；R1_UP：正常控制
+        // R1_DOWN：强行回到0点；R1_MID：强行回到“7”字形点；R1_UP：正常控制
         // 这里使用ARM_PC_MODE下发6个关节目标，避免大小臂模式只控制部分关节
-        if (fs_data[TEMP].switch_r1 == FS_SW_MID)
+        if (fs_data[TEMP].switch_r1 == FS_SW_DOWN)
         {
             dummy_cmd_send.arm_mode = ARM_PC_MODE;
             dummy_cmd_send.joint1_angle = ARM_HOME_JOINT1;
@@ -121,7 +107,7 @@ void FS_Remote_Ctrl(void)
             dummy_cmd_send.joint6_angle = ARM_HOME_JOINT6;
             return;
         }
-        else if (fs_data[TEMP].switch_r1 == FS_SW_DOWN)
+        else if (fs_data[TEMP].switch_r1 == FS_SW_MID)
         {
             dummy_cmd_send.arm_mode = ARM_PC_MODE;
             dummy_cmd_send.joint1_angle = ARM_SEVEN_JOINT1;
@@ -191,17 +177,17 @@ void FS_Remote_Ctrl(void)
 
 static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd)
 {
-    // 关节角度限幅 (基于 Dummy_Motormatic_Init 中的配置)
-    // joint_min_limit: {0, 0, 0,  0,   0,   0}
-    // joint_max_limit: {340, 155, 215, 360, 240, 720}
+    // 关节角度限幅 (与 Dummy_Motormatic_Init 中 ArmConfig_t 和 motor_configs 保持一致)
+    // joint_min_limit: {-175, -25,   0, -180, -120, -360}
+    // joint_max_limit: { 175, 150, 180,  180,  120,  360}
 
     if (cmd->joint1_angle < -175.0f)
         cmd->joint1_angle = -175.0f;
     if (cmd->joint1_angle > 175.0f)
         cmd->joint1_angle = 175.0f;
 
-    if (cmd->joint2_angle < -30.0f)
-        cmd->joint2_angle = -30.0f;
+    if (cmd->joint2_angle < -25.0f)
+        cmd->joint2_angle = -25.0f;
     if (cmd->joint2_angle > 150.0f)
         cmd->joint2_angle = 150.0f;
 
@@ -251,7 +237,7 @@ static void DummyCmd_Serial_Debug_Send(void)
         dummy_fetch_data.current_pose.C,
     };
 
-    Serial_Debug_SendFloatArray(channels, SERIAL_DEBUG_JUSTFLOAT_CHANNELS);
+    SerialDebug_Send_JustFloat(serial_debug_instance, channels, SERIAL_DEBUG_JUSTFLOAT_CHANNELS);
 }
 #if DUMMY_CMD_FKIK_TEST_ENABLE
 static void DummyCmd_FKIK_Test_Send(void)
@@ -296,7 +282,7 @@ static void DummyCmd_FKIK_Test_Send(void)
         test_pose.C,
     };
 
-    Serial_Debug_SendFloatArray(channels, SERIAL_DEBUG_JUSTFLOAT_CHANNELS);
+    SerialDebug_Send_JustFloat(serial_debug_instance, channels, SERIAL_DEBUG_JUSTFLOAT_CHANNELS);
 }
 #endif
 #endif
@@ -312,7 +298,7 @@ void Vision_Set_FeedData(void)
     vision_tx_data.joint6 = dummy_fetch_data.joint_motor[5].reduction_angle;
 
     uint8_t all_finished = 1;
-    for (int i = 1; i <= 6; i++)
+    for (int i = 0; i < 6; i++)
     {
         if (dummy_fetch_data.joint_motor[i].is_finished == 0)
         {
@@ -327,7 +313,6 @@ void Vision_Set_FeedData(void)
     Vision_Send_Data((uint8_t *)&vision_tx_data, sizeof(Transmit_Data_s));
 }
 
-#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
 void Bt_Set_FeedData(void)
 {
     bt_tx_data.header = 0xAA;
@@ -339,7 +324,7 @@ void Bt_Set_FeedData(void)
     bt_tx_data.joint6 = dummy_fetch_data.joint_motor[5].reduction_angle;
 
     uint8_t all_finished = 1;
-    for (int i = 1; i <= 6; i++)
+    for (int i = 0; i < 6; i++)
     {
         if (dummy_fetch_data.joint_motor[i].is_finished == 0)
         {
@@ -352,4 +337,3 @@ void Bt_Set_FeedData(void)
     bt_tx_data.tailer = 0XFFFB;
     BT_SendData((uint8_t *)&bt_tx_data, sizeof(TX_BT_Data_s));
 }
-#endif

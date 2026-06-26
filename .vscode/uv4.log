@@ -2,24 +2,11 @@
 Build target 'Target_1'
 Before Build - User command #1: cmd /c ""c:\Users\Xiong Sir\Desktop\Renesas_Dummy\rasc_launcher.bat" "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\rasc_version.txt" -nosplash --launcher.suppressErrors --generate --compiler ARMv6 --devicefamily ra "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\configuration.xml" 2> "%TEMP%\rasc_stderr.out" && echo. > "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\output.rasc""
 [INFO] Input file "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\configuration.xml" is older than output file "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\output.rasc". Skipping RASC invocation.
-compiling robot_task_entry.c...
-compiling motor_ctrl_task_entry.c...
-application/dummy_motormatic.c(100): warning: implicit conversion loses integer precision: 'size_t' (aka 'unsigned int') to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
-  100 |             Joint_Motor_Set_Current(i + 1, 0.0f);
-      |             ~~~~~~~~~~~~~~~~~~~~~~~ ~~^~~
-application/dummy_motormatic.c(138): warning: implicit conversion loses integer precision: 'gripper_mode_e' to 'uint8_t' (aka 'unsigned char') [-Wimplicit-int-conversion]
-  138 |         Joint_Motor_Gripper_Task(&gripper_config, dummy_cmd_data.gripper_mode);
-      |         ~~~~~~~~~~~~~~~~~~~~~~~~                  ~~~~~~~~~~~~~~~^~~~~~~~~~~~
-2 warnings generated.
-compiling dummy_motormatic.c...
+application/dummy_cmd.c(215): error: unterminated conditional directive
+  215 | #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
+      |  ^
+1 error generated.
 compiling dummy_cmd.c...
-compiling flysky.c...
-compiling step_motor.c...
-linking...
-Program Size: Code=26336 RO-data=3772 RW-data=340 ZI-data=21628  
-FromELF: creating hex file...
-After Build - User command #1: cmd /c ""c:\Users\Xiong Sir\Desktop\Renesas_Dummy\rasc_launcher.bat" "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\rasc_version.txt" -nosplash --launcher.suppressErrors --gensmartbundle --compiler ARMv6 --devicefamily ra "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\configuration.xml" "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\Objects\FSP_Project.axf" 2> "%TEMP%\rasc_stderr.out""
-[INFO] Input file "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\Objects\FSP_Project.axf" is newer than output file "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\Objects\FSP_Project.sbd". Proceeding with RASC invocation...
-Generating Smart Bundle..
-".\Objects\FSP_Project.axf" - 0 Error(s), 2 Warning(s).
-Build Time Elapsed:  00:00:13
+".\Objects\FSP_Project.axf" - 1 Error(s), 0 Warning(s).
+Target not created.
+Build Time Elapsed:  00:00:04
