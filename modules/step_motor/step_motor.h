@@ -112,6 +112,22 @@ typedef struct {
     uint32_t timeout_loops;            // 超时保护循环次数
 } Gripper_Config_t;
 
+typedef enum {
+    GRIPPER_CALIB_IDLE = 0,
+    GRIPPER_CALIB_OPENING,
+    GRIPPER_CALIB_CLOSING,
+    GRIPPER_CALIB_DONE,
+    GRIPPER_CALIB_FAILED
+} Gripper_Calib_State_t;
+
+/* 夹爪校准结果 */
+typedef struct {
+    float open_angle;
+    float close_angle;
+    bool is_calibrated;
+    Gripper_Calib_State_t state;
+} Gripper_Calib_Result_t;
+
 /* --- API --- */
 void Joint_Motor_Init_Legacy(void); // Renaming or Removing old declaration
 Joint_t *Joint_Motor_Get_Joint(uint8_t id);
@@ -171,5 +187,10 @@ void Joint_All_Motor_Set(float joint1_angle, float joint2_angle, float joint3_an
 #define GRIPPER_STATE_LOCKED    2 // 已锁定
 // 夹爪控制 API
 void Joint_Motor_Gripper_Task(Gripper_Config_t *config, uint8_t gripper_mode);
+void Joint_Motor_Gripper_Calib_Reset(void);
+bool Joint_Motor_Gripper_Calib_Task(Gripper_Config_t *config);
+bool Joint_Motor_Gripper_Is_Calibrated(void);
+float Joint_Motor_Gripper_Map_Knob(float knob_value, float knob_min, float knob_max);
+Gripper_Calib_Result_t Joint_Motor_Gripper_Get_Calib_Result(void);
 
 #endif /* __Joint_MOTOR_H */

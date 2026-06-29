@@ -1,12 +1,3 @@
-*** Using Compiler 'V6.23', folder: 'D:\keil5 c51+stm32\ARM\PACK\ARM\ARMCLANG\Bin'
-Build target 'Target_1'
-Before Build - User command #1: cmd /c ""c:\Users\Xiong Sir\Desktop\Renesas_Dummy\rasc_launcher.bat" "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\rasc_version.txt" -nosplash --launcher.suppressErrors --generate --compiler ARMv6 --devicefamily ra "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\configuration.xml" 2> "%TEMP%\rasc_stderr.out" && echo. > "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\output.rasc""
-[INFO] Input file "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\configuration.xml" is older than output file "c:\Users\Xiong Sir\Desktop\Renesas_Dummy\output.rasc". Skipping RASC invocation.
-application/dummy_cmd.c(215): error: unterminated conditional directive
-  215 | #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
-      |  ^
-1 error generated.
-compiling dummy_cmd.c...
-".\Objects\FSP_Project.axf" - 1 Error(s), 0 Warning(s).
-Target not created.
-Build Time Elapsed:  00:00:04
+Load "c:\\Users\\Xiong Sir\\Desktop\\Renesas_Dummy\\Objects\\FSP_Project.axf" 
+Erase Done.Programming Done.Verify OK.Application running ...
+Flash Load finished at 22:29:27

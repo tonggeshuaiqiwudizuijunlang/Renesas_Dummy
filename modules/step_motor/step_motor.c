@@ -348,6 +348,264 @@ void CANTransmit_Test(void)
 #define GRIPPER_STATE_WAIT_LOAD 1 // 等待受力
 #define GRIPPER_STATE_LOCKED 2    // 已锁定
 
+#define GRIPPER_CALIB_QUERY_DIV 5U
+#define GRIPPER_CALIB_CONFIRM_LOOPS 8U
+#define GRIPPER_CALIB_MAX_LOOP_FACTOR 8U
+#define GRIPPER_CALIB_BACKOFF_ANGLE 3.0f
+#define GRIPPER_CALIB_MIN_RANGE 10.0f
+#define GRIPPER_CALIB_IGNORE_LOOPS 80U
+#define GRIPPER_CALIB_STALL_DELTA 0.3f
+#define GRIPPER_CALIB_MIN_TRAVEL 10.0f
+
+static Gripper_Calib_Result_t gripper_calib_result = {0};
+static uint32_t gripper_calib_loop_count = 0;
+static uint32_t gripper_calib_load_count = 0;
+static uint8_t gripper_calib_query_div = 0;
+static float gripper_calib_start_angle = 0.0f;
+static float gripper_calib_last_angle = 0.0f;
+static float gripper_fallback_open_angle = 0.0f;
+static float gripper_fallback_close_angle = 500.0f;
+
+static float Abs_Float(float value)
+{
+    return (value >= 0.0f) ? value : -value;
+}
+
+static float Limit_Float(float value, float min, float max)
+{
+    if (min > max)
+    {
+        float temp = min;
+        min = max;
+        max = temp;
+    }
+    if (value < min)
+        value = min;
+    if (value > max)
+        value = max;
+    return value;
+}
+
+static float Map_Float_Clamp_Local(float x, float in_min, float in_max, float out_min, float out_max)
+{
+    if (Abs_Float(in_max - in_min) < 0.001f)
+        return out_min;
+
+    x = Limit_Float(x, in_min, in_max);
+    float ratio = (x - in_min) / (in_max - in_min);
+    float value = out_min + ratio * (out_max - out_min);
+
+    return Limit_Float(value, out_min, out_max);
+}
+
+static bool Gripper_Calib_Is_Usable(void)
+{
+    return gripper_calib_result.is_calibrated &&
+           gripper_calib_result.state == GRIPPER_CALIB_DONE &&
+           Abs_Float(gripper_calib_result.close_angle - gripper_calib_result.open_angle) > GRIPPER_CALIB_MIN_RANGE;
+}
+
+static void Gripper_Get_Usable_Range(float *open_angle, float *close_angle)
+{
+    float open = gripper_fallback_open_angle;
+    float close = gripper_fallback_close_angle;
+
+    if (Gripper_Calib_Is_Usable())
+    {
+        open = gripper_calib_result.open_angle;
+        close = gripper_calib_result.close_angle;
+
+        if (close > open)
+        {
+            open += GRIPPER_CALIB_BACKOFF_ANGLE;
+            close -= GRIPPER_CALIB_BACKOFF_ANGLE;
+        }
+        else
+        {
+            open -= GRIPPER_CALIB_BACKOFF_ANGLE;
+            close += GRIPPER_CALIB_BACKOFF_ANGLE;
+        }
+    }
+
+    if (open_angle != NULL)
+        *open_angle = open;
+    if (close_angle != NULL)
+        *close_angle = close;
+}
+
+static float Gripper_Get_Open_Angle(Gripper_Config_t *config)
+{
+    if (config != NULL)
+    {
+        gripper_fallback_open_angle = config->release_angle;
+        gripper_fallback_close_angle = config->target_grab_angle;
+    }
+
+    float open_angle = gripper_fallback_open_angle;
+    Gripper_Get_Usable_Range(&open_angle, NULL);
+    return open_angle;
+}
+
+static float Gripper_Get_Close_Angle(Gripper_Config_t *config)
+{
+    if (config != NULL)
+    {
+        gripper_fallback_open_angle = config->release_angle;
+        gripper_fallback_close_angle = config->target_grab_angle;
+    }
+
+    float close_angle = gripper_fallback_close_angle;
+    Gripper_Get_Usable_Range(NULL, &close_angle);
+    return close_angle;
+}
+
+void Joint_Motor_Gripper_Calib_Reset(void)
+{
+    gripper_calib_result.open_angle = gripper_fallback_open_angle;
+    gripper_calib_result.close_angle = gripper_fallback_close_angle;
+    gripper_calib_result.is_calibrated = false;
+    gripper_calib_result.state = GRIPPER_CALIB_IDLE;
+    gripper_calib_loop_count = 0;
+    gripper_calib_load_count = 0;
+    gripper_calib_query_div = 0;
+    gripper_calib_start_angle = 0.0f;
+    gripper_calib_last_angle = 0.0f;
+}
+
+bool Joint_Motor_Gripper_Calib_Task(Gripper_Config_t *config)
+{
+    if (config == NULL || config->id == 0 || config->id > ARM_JOINT_COUNT)
+        return true;
+
+    uint8_t id = config->id;
+    gripper_fallback_open_angle = config->release_angle;
+    gripper_fallback_close_angle = config->target_grab_angle;
+
+    if (gripper_calib_result.state == GRIPPER_CALIB_DONE || gripper_calib_result.state == GRIPPER_CALIB_FAILED)
+        return true;
+
+    bool close_is_positive = (config->target_grab_angle > config->release_angle);
+    float search_target;
+
+    if (gripper_calib_result.state == GRIPPER_CALIB_IDLE)
+    {
+        gripper_calib_result.is_calibrated = false;
+        gripper_calib_result.open_angle = config->release_angle;
+        gripper_calib_result.close_angle = config->target_grab_angle;
+        gripper_calib_result.state = GRIPPER_CALIB_OPENING;
+        gripper_calib_loop_count = 0;
+        gripper_calib_load_count = 0;
+        gripper_calib_query_div = 0;
+        gripper_calib_start_angle = dummy_joints[id].reduction_angle;
+        gripper_calib_last_angle = dummy_joints[id].reduction_angle;
+        dummy_joints[id].current = 0.0f;
+        Joint_Motor_Query_State(id);
+        Send_Generic(id, CMD_GET_CURRENT, NULL, 0);
+    }
+
+    if (gripper_calib_result.state == GRIPPER_CALIB_OPENING)
+        search_target = close_is_positive ? joint_configs[id].joint_min_angle : joint_configs[id].joint_max_angle;
+    else
+        search_target = close_is_positive ? joint_configs[id].joint_max_angle : joint_configs[id].joint_min_angle;
+
+    Joint_Motor_Set_Pos_With_SpeedLimit(id, search_target, config->speed_limit);
+
+    if (++gripper_calib_query_div >= GRIPPER_CALIB_QUERY_DIV)
+    {
+        gripper_calib_query_div = 0;
+
+        float current_angle = dummy_joints[id].reduction_angle;
+        float angle_delta = Abs_Float(current_angle - gripper_calib_last_angle);
+        float travel = Abs_Float(current_angle - gripper_calib_start_angle);
+        float abs_current = Abs_Float(dummy_joints[id].current);
+
+        if (gripper_calib_loop_count > GRIPPER_CALIB_IGNORE_LOOPS &&
+            travel > GRIPPER_CALIB_MIN_TRAVEL &&
+            abs_current >= config->stop_threshold_current &&
+            angle_delta < GRIPPER_CALIB_STALL_DELTA)
+        {
+            gripper_calib_load_count++;
+        }
+        else
+        {
+            gripper_calib_load_count = 0;
+        }
+
+        gripper_calib_last_angle = current_angle;
+        Send_Generic(id, CMD_GET_CURRENT, NULL, 0);
+        Joint_Motor_Query_State(id);
+    }
+
+    if (gripper_calib_load_count >= GRIPPER_CALIB_CONFIRM_LOOPS)
+    {
+        if (gripper_calib_result.state == GRIPPER_CALIB_OPENING)
+        {
+            gripper_calib_result.open_angle = dummy_joints[id].reduction_angle;
+            gripper_calib_result.state = GRIPPER_CALIB_CLOSING;
+            gripper_calib_loop_count = 0;
+            gripper_calib_load_count = 0;
+            gripper_calib_query_div = 0;
+            gripper_calib_start_angle = dummy_joints[id].reduction_angle;
+            gripper_calib_last_angle = dummy_joints[id].reduction_angle;
+            dummy_joints[id].current = 0.0f;
+            Joint_Motor_Query_State(id);
+            Send_Generic(id, CMD_GET_CURRENT, NULL, 0);
+            return false;
+        }
+        else if (gripper_calib_result.state == GRIPPER_CALIB_CLOSING)
+        {
+            gripper_calib_result.close_angle = dummy_joints[id].reduction_angle;
+            if (Abs_Float(gripper_calib_result.close_angle - gripper_calib_result.open_angle) > GRIPPER_CALIB_MIN_RANGE)
+            {
+                gripper_calib_result.is_calibrated = true;
+                gripper_calib_result.state = GRIPPER_CALIB_DONE;
+                Joint_Motor_Set_Pos_With_SpeedLimit(id, Gripper_Get_Open_Angle(config), config->speed_limit);
+            }
+            else
+            {
+                gripper_calib_result.is_calibrated = false;
+                gripper_calib_result.state = GRIPPER_CALIB_FAILED;
+            }
+            return true;
+        }
+    }
+
+    gripper_calib_loop_count++;
+    uint32_t max_loops = config->timeout_loops * GRIPPER_CALIB_MAX_LOOP_FACTOR;
+    if (max_loops < 1000U)
+        max_loops = 1000U;
+
+    if (gripper_calib_loop_count > max_loops)
+    {
+        gripper_calib_result.is_calibrated = false;
+        gripper_calib_result.state = GRIPPER_CALIB_FAILED;
+        gripper_calib_result.open_angle = config->release_angle;
+        gripper_calib_result.close_angle = config->target_grab_angle;
+        return true;
+    }
+
+    return false;
+}
+
+bool Joint_Motor_Gripper_Is_Calibrated(void)
+{
+    return Gripper_Calib_Is_Usable();
+}
+
+float Joint_Motor_Gripper_Map_Knob(float knob_value, float knob_min, float knob_max)
+{
+    float open_angle;
+    float close_angle;
+    Gripper_Get_Usable_Range(&open_angle, &close_angle);
+
+    return Map_Float_Clamp_Local(knob_value, knob_min, knob_max, open_angle, close_angle);
+}
+
+Gripper_Calib_Result_t Joint_Motor_Gripper_Get_Calib_Result(void)
+{
+    return gripper_calib_result;
+}
+
 /**
  * @brief 夹爪状态机任务
  * @param config       夹爪的各项参数配置结构体
@@ -362,11 +620,13 @@ void Joint_Motor_Gripper_Task(Gripper_Config_t *config, uint8_t gripper_mode)
     static uint32_t loop_count = 0; // 按RTOS周期累加计数器
 
     uint8_t id = config->id;
+    float open_angle = Gripper_Get_Open_Angle(config);
+    float close_angle = Gripper_Get_Close_Angle(config);
 
     if (gripper_mode == GRIPPER_RELEASE)
     {
         // 只要是释放模式，就一直给它发松开的位置或者单次发（这里为了让它动，直接下发位置）
-        Joint_Motor_Set_Pos_With_SpeedLimit(id, config->release_angle, config->speed_limit);
+        Joint_Motor_Set_Pos_With_SpeedLimit(id, open_angle, config->speed_limit);
         grab_state = GRIPPER_STATE_IDLE;
         loop_count = 0;
     }
@@ -376,7 +636,7 @@ void Joint_Motor_Gripper_Task(Gripper_Config_t *config, uint8_t gripper_mode)
         {
             // 从空闲切成抓取，开始往目标点进发
             dummy_joints[id].current = 0.0f; // 清除历史反馈电流
-            Joint_Motor_Set_Pos_With_SpeedLimit(id, config->target_grab_angle, config->speed_limit);
+            Joint_Motor_Set_Pos_With_SpeedLimit(id, close_angle, config->speed_limit);
             grab_state = GRIPPER_STATE_WAIT_LOAD;
         }
         else if (grab_state == GRIPPER_STATE_WAIT_LOAD)
@@ -400,7 +660,7 @@ void Joint_Motor_Gripper_Task(Gripper_Config_t *config, uint8_t gripper_mode)
                     if (loop_count > 2 * config->timeout_loops)
                         loop_count = 2 * config->timeout_loops;
 
-                    float dir_sign = (config->target_grab_angle > config->release_angle) ? 1.0f : -1.0f;
+                    float dir_sign = (close_angle > open_angle) ? 1.0f : -1.0f;
                     float hold_angle = dummy_joints[id].reduction_angle + (dir_sign * 3.0f);
 
                     Joint_Motor_Set_Pos_With_SpeedLimit(id, hold_angle, config->speed_limit);
@@ -426,7 +686,7 @@ void Joint_Motor_Gripper_Task(Gripper_Config_t *config, uint8_t gripper_mode)
                 keep_alive_div = 0;
                 Send_Generic(id, CMD_GET_CURRENT, NULL, 0); // 用查询指令当作心跳包喂狗
             }
-            float dir_sign = (config->target_grab_angle > config->release_angle) ? 1.0f : -1.0f;
+            float dir_sign = (close_angle > open_angle) ? 1.0f : -1.0f;
             float hold_angle = dummy_joints[id].reduction_angle + (dir_sign * 3.0f);
 
             Joint_Motor_Set_Pos_With_SpeedLimit(id, hold_angle, config->speed_limit);

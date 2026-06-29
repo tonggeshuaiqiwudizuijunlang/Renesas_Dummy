@@ -64,4 +64,5 @@
   bsp\can\bsp_can.h modules\daemon\daemon.h modules\motor_def.h \
   modules\controller\controller.h \
   modules\message_center\message_center.h \
-  modules\dummy_kinematic\dummy_kinematic_v2.h application\dummy_cmd.h
+  modules\dummy_kinematic\dummy_kinematic_v2.h modules\remote\flysky.h \
+  bsp\uart\bsp_uart.h application\dummy_cmd.h

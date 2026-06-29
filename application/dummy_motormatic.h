@@ -3,6 +3,7 @@
 
 #include "robot_types.h"
 #include "dummy_kinematic_v2.h"
+#include "flysky.h"
 
 #define REMOTE_JOINT_GAIN 0.0003f
 #define REMOTE_KNOB_RANGE ((float)(FS_DATA_DOWN - FS_DATA_MIN))

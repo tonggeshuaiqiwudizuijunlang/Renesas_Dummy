@@ -515,6 +515,14 @@ int Kinematic_Select_Best_Sol(const DOF6Kinematic_Handle_t *handle,
 {
     int best_index = -1;
     float best_score = FLT_MAX;
+    static const float joint_weight[6] = {
+        8.0f,
+        8.0f,
+        4.0f,
+        1.5f,
+        1.0f,
+        0.8f,
+    };
 
     for (int i = 0; i < 8; i++)
     {
@@ -538,7 +546,7 @@ int Kinematic_Select_Best_Sol(const DOF6Kinematic_Handle_t *handle,
         for (int j = 0; j < 6; j++)
         {
             float diff = AngleDiffDeg(solves->config[i].a[j], current_joints->a[j]);
-            score += diff * diff;
+            score += joint_weight[j] * diff * diff;
         }
 
         if (solves->solFlag[i][2] < 0)
