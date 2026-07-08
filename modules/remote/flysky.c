@@ -97,9 +97,13 @@ static void FSRxCallback(void)
 {
     // 1. 从 BSP 拿到这一帧长度的数据
     uint8_t *new_data = fs_usart_instance->recv_buff;
+    uint16_t recv_len = fs_usart_instance->recv_len;
+
+    if (recv_len == 0U)
+        recv_len = fs_usart_instance->recv_buff_size;
 
     // 2. 全部塞入软 FIFO
-    for (uint16_t i = 0; i < FS_FRAME_SIZE; i++)
+    for (uint16_t i = 0; i < recv_len; i++)
     {
         s_raw_fifo[s_head] = new_data[i];
         s_head = (s_head + 1) % RAW_FIFO_SIZE;

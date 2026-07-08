@@ -82,11 +82,13 @@ void Dummy_Motormatic_Init(void)
     // --- 夹爪专门配置参数 ---
     gripper_config.id = 7;
     gripper_config.target_grab_angle = 500.0f;
-    gripper_config.stop_threshold_current = 0.5f;
+    gripper_config.stop_threshold_current = DUMMY_GRIPPER_STOP_THRESHOLD_CURRENT;
     gripper_config.release_angle = 0.0f;
     gripper_config.speed_limit = 50.0f;
     gripper_config.timeout_loops = 500;
+#if DUMMY_GRIPPER_CALIB_ENABLE
     Joint_Motor_Gripper_Calib_Reset();
+#endif
 
     dummy_motormatic_pub = PubRegister("dummy_feed", sizeof(Dummy_Upload_Data_s));
     dummy_motormatic_sub = SubRegister("dummy_cmd", sizeof(Dummy_Ctrl_Cmd_s));
@@ -154,15 +156,10 @@ void Dummy_Motormatic_Task(void)
     SubGetMessage(dummy_motormatic_sub, &dummy_cmd_data);
 
     Dummy_Joint_Update();
-    if (!Joint_Motor_Gripper_Calib_Task(&gripper_config))
-    {
-        PubPushMessage(dummy_motormatic_pub, &dummy_feed_data);
-        return;
-    }
 
     if (dummy_cmd_data.arm_mode == ARM_ZERO_FORCE)
     {
-        for (size_t i = 0; i < 7; i++)
+        for (uint8_t i = 0; i < 7; i++)
         {
             Joint_Motor_Set_Current(i + 1, 0.0f);
         }
@@ -170,7 +167,20 @@ void Dummy_Motormatic_Task(void)
         PubPushMessage(dummy_motormatic_pub, &dummy_feed_data);
         return;
     }
-    else if (dummy_cmd_data.arm_mode == ARM_FREE_MODE)
+
+    bool gripper_calib_active = false;
+#if DUMMY_GRIPPER_CALIB_ENABLE
+    gripper_calib_active = !Joint_Motor_Gripper_Calib_Task(&gripper_config);
+#if DUMMY_GRIPPER_CALIB_BLOCK_ARM_ENABLE
+    if (gripper_calib_active)
+    {
+        PubPushMessage(dummy_motormatic_pub, &dummy_feed_data);
+        return;
+    }
+#endif
+#endif
+
+    if (dummy_cmd_data.arm_mode == ARM_FREE_MODE)
     {
         Joint6D_t target = {{
             dummy_cmd_data.joint1_angle,
@@ -207,15 +217,18 @@ void Dummy_Motormatic_Task(void)
         Dummy_Motormatic_MoveJ_Sync(&target, active_axis);
     }
 
-    if (dummy_cmd_data.gripper_mode == GRIPPER_MANUAL_GRAB)
+    if (!gripper_calib_active)
     {
-        float gripper_angle = Joint_Motor_Gripper_Map_Knob(dummy_cmd_data.gripper_current, 0.0f, REMOTE_KNOB_RANGE);
-        Joint_Motor_Set_Pos_With_SpeedLimit(7, gripper_angle, gripper_config.speed_limit);
-    }
-    else
-    {
-        // 定期执行夹爪防错状态机，传入结构体配置以及模式枚举
-        Joint_Motor_Gripper_Task(&gripper_config, dummy_cmd_data.gripper_mode);
+        if (dummy_cmd_data.gripper_mode == GRIPPER_MANUAL_GRAB)
+        {
+            float gripper_angle = Joint_Motor_Gripper_Map_Knob(dummy_cmd_data.gripper_current, 0.0f, REMOTE_KNOB_RANGE);
+            Joint_Motor_Set_Pos_With_SpeedLimit(7, gripper_angle, gripper_config.speed_limit);
+        }
+        else
+        {
+            // 定期执行夹爪防错状态机，传入结构体配置以及模式枚举
+            Joint_Motor_Gripper_Task(&gripper_config, (uint8_t)dummy_cmd_data.gripper_mode);
+        }
     }
     PubPushMessage(dummy_motormatic_pub, &dummy_feed_data);
 }

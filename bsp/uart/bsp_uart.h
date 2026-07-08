@@ -19,6 +19,8 @@ typedef struct
 {
     uint8_t recv_buff[USART_RXBUFF_LIMIT];
     uint8_t recv_buff_size;
+    volatile uint16_t recv_len;
+    uint8_t use_rx_char;
     /* FSP 原生句柄 */
     uart_ctrl_t * p_ctrl;
     uart_cfg_t const * p_cfg;
@@ -37,6 +39,7 @@ typedef struct
 {
     /* 直接传入 FSP 生成的全局变量指针 */
     uint8_t recv_buff_size;
+    uint8_t use_rx_char;
     uart_ctrl_t * p_uart_ctrl;     
     uart_cfg_t const * p_uart_cfg; 
     usart_module_callback module_callback;

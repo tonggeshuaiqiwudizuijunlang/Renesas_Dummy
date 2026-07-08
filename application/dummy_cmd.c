@@ -23,22 +23,42 @@ static Pose6D_t remote_target_pose;
 static bool remote_pose_initialized = false;
 #endif
 
+#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
 static SerialDebug_Instance_s *serial_debug_instance;
+#endif
 
-static RX_BT_Data_s *bt_rx_data;
-static TX_BT_Data_s bt_tx_data;
+RX_BT_Pose_Data_s *bt_rx_data;
+TX_BT_Data_s bt_tx_data;
+
+volatile DummyCmd_Debug_s dummy_cmd_debug = {
+    .bt_last_status = DUMMY_CMD_BT_STATUS_IDLE,
+};
 
 
 static void FS_Remote_Control(void);
 static void Vision_Set_FeedData(void);
+static void DummyCmd_Set_Controller_Joints(arm_mode_e arm_mode, const Joint6D_t *joints);
+static void DummyCmd_Motor_To_Controller_Joints(const Joint6D_t *motor_joints, Joint6D_t *controller_joints);
+static uint8_t DummyCmd_Get_Motion_Finished_Feedback(void);
+#if DUMMY_CMD_REMOTE_POSE_TEST_ENABLE || (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
+static float Limit_Float(float value, float min, float max);
+static float Normalize_Pose_Angle(float angle);
+#endif
 #if DUMMY_CMD_REMOTE_POSE_TEST_ENABLE
 static void FS_Remote_Pose_Test_Control(void);
-static float Limit_Float(float value, float min, float max);
 #endif
+#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_SERIAL_DEBUG)
 static void DummyCmd_Serial_Debug_Send(void);
+#if DUMMY_CMD_FKIK_TEST_ENABLE
 static void DummyCmd_FKIK_Test_Send(void);
+#endif
+#endif
 static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd);
 static void Bt_Set_FeedData(void);
+#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
+static bool Bt_Pose_IK_Control(void);
+static bool Bt_Pose_Try_Solve(const Pose6D_t *target_pose);
+#endif
 
 void DummyCmd_Init(void)
 {
@@ -81,6 +101,10 @@ void DummyCmd_Task(void)
 static void FS_Remote_Control(void)
 {
     float gripper_knob = fs_data[TEMP].knob_l;
+
+    dummy_cmd_debug.last_switch_l2 = fs_data[TEMP].switch_l2;
+    dummy_cmd_debug.last_switch_r1 = fs_data[TEMP].switch_r1;
+    dummy_cmd_debug.last_switch_r2 = fs_data[TEMP].switch_r2;
 
     // 优先级1：R2为急停开关，只要拨到DOWN就直接进入零力模式，其他控制全部不再处理
     if (fs_data[TEMP].switch_r2 == FS_SW_DOWN)
@@ -135,26 +159,26 @@ static void FS_Remote_Control(void)
         // L2_DOWN：PC上位机控制，直接使用视觉/上位机给出的目标角度
         if (fs_data[TEMP].switch_l2 == FS_SW_DOWN)
         {
-            dummy_cmd_send.arm_mode = ARM_PC_MODE;
-            dummy_cmd_send.joint1_angle = -vision_rx_data->joint1;
-            dummy_cmd_send.joint2_angle = -vision_rx_data->joint2 + 75.0f;
-            dummy_cmd_send.joint3_angle = -vision_rx_data->joint3 + 90.0f;
-            dummy_cmd_send.joint4_angle = vision_rx_data->joint4;
-            dummy_cmd_send.joint5_angle = -vision_rx_data->joint5;
-            dummy_cmd_send.joint6_angle = vision_rx_data->joint6;
+            Joint6D_t vision_joints = {{
+                vision_rx_data->joint1,
+                vision_rx_data->joint2,
+                vision_rx_data->joint3,
+                vision_rx_data->joint4,
+                vision_rx_data->joint5,
+                vision_rx_data->joint6,
+            }};
+            DummyCmd_Set_Controller_Joints(ARM_PC_MODE, &vision_joints);
 
         }
-        // L2_MID：自定义控制器控制，目前保持自由模式，不叠加遥控器摇杆量
+        // L2_MID: Bluetooth pose control, solve 6 joint targets with IK.
         else if (fs_data[TEMP].switch_l2 == FS_SW_MID)
         {
 #if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
-            dummy_cmd_send.arm_mode = ARM_CUSTOM_MODE;
-            dummy_cmd_send.joint1_angle = bt_rx_data->joint1;
-            dummy_cmd_send.joint2_angle = bt_rx_data->joint2;
-            dummy_cmd_send.joint3_angle = bt_rx_data->joint3;
-            dummy_cmd_send.joint4_angle = bt_rx_data->joint4;
-            dummy_cmd_send.joint5_angle = bt_rx_data->joint5;
-            dummy_cmd_send.joint6_angle = bt_rx_data->joint6;
+            dummy_cmd_debug.bt_branch_count++;
+            if (!Bt_Pose_IK_Control())
+            {
+                dummy_cmd_send.arm_mode = ARM_FREE_MODE;
+            }
 #else
             dummy_cmd_send.arm_mode = ARM_FREE_MODE;
 #endif
@@ -190,6 +214,48 @@ static void FS_Remote_Control(void)
         }
     }
     limit_joint_angles(&dummy_cmd_send);
+}
+
+static void DummyCmd_Set_Controller_Joints(arm_mode_e arm_mode, const Joint6D_t *joints)
+{
+    if (joints == NULL)
+        return;
+
+    dummy_cmd_send.arm_mode = arm_mode;
+    dummy_cmd_send.joint1_angle = -joints->a[0];
+    dummy_cmd_send.joint2_angle = -joints->a[1] + 75.0f;
+    dummy_cmd_send.joint3_angle = -joints->a[2] + 90.0f;
+    dummy_cmd_send.joint4_angle = joints->a[3];
+    dummy_cmd_send.joint5_angle = -joints->a[4];
+    dummy_cmd_send.joint6_angle = joints->a[5];
+}
+
+static void DummyCmd_Motor_To_Controller_Joints(const Joint6D_t *motor_joints, Joint6D_t *controller_joints)
+{
+    if ((motor_joints == NULL) || (controller_joints == NULL))
+        return;
+
+    controller_joints->a[0] = -motor_joints->a[0];
+    controller_joints->a[1] = -motor_joints->a[1] + 75.0f;
+    controller_joints->a[2] = -motor_joints->a[2] + 90.0f;
+    controller_joints->a[3] = motor_joints->a[3];
+    controller_joints->a[4] = -motor_joints->a[4];
+    controller_joints->a[5] = motor_joints->a[5];
+}
+
+static uint8_t DummyCmd_Get_Motion_Finished_Feedback(void)
+{
+#if DUMMY_CMD_NONBLOCKING_FINISH_FEEDBACK_ENABLE
+    return 1u;
+#else
+    for (uint8_t i = 0; i < 6; i++)
+    {
+        if (dummy_fetch_data.joint_motor[i].is_finished == 0)
+            return 0u;
+    }
+
+    return 1u;
+#endif
 }
 
 static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd)
@@ -229,7 +295,7 @@ static void limit_joint_angles(Dummy_Ctrl_Cmd_s *cmd)
         cmd->joint6_angle = 360.0f;
 }
 
-#if DUMMY_CMD_REMOTE_POSE_TEST_ENABLE
+#if DUMMY_CMD_REMOTE_POSE_TEST_ENABLE || (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
 static float Limit_Float(float value, float min, float max)
 {
     if (value < min)
@@ -239,6 +305,17 @@ static float Limit_Float(float value, float min, float max)
     return value;
 }
 
+static float Normalize_Pose_Angle(float angle)
+{
+    while (angle > 180.0f)
+        angle -= 360.0f;
+    while (angle <= -180.0f)
+        angle += 360.0f;
+    return angle;
+}
+#endif
+
+#if DUMMY_CMD_REMOTE_POSE_TEST_ENABLE
 static void FS_Remote_Pose_Test_Control(void)
 {
     if (cmd_kinematic_handle == NULL)
@@ -293,6 +370,98 @@ static void FS_Remote_Pose_Test_Control(void)
             dummy_cmd_send.joint6_angle = solves.config[best].a[5];
         }
     }
+}
+#endif
+
+#if (DUMMY_CMD_UART_MODE == DUMMY_CMD_UART_MODE_BLUETOOTH)
+static bool Bt_Pose_IK_Control(void)
+{
+    if ((cmd_kinematic_handle == NULL) || (bt_rx_data == NULL))
+    {
+        dummy_cmd_debug.bt_last_status = DUMMY_CMD_BT_STATUS_NO_HANDLE;
+        return false;
+    }
+
+    dummy_cmd_debug.bt_last_header = bt_rx_data->header;
+    dummy_cmd_debug.bt_last_tailer = bt_rx_data->tailer;
+
+    if ((bt_rx_data->header != 0x5A) || (bt_rx_data->tailer != 0xFFFB))
+    {
+        dummy_cmd_debug.bt_last_status = DUMMY_CMD_BT_STATUS_NO_FRAME;
+        return false;
+    }
+
+    Pose6D_t target_pose = {
+        .X = bt_rx_data->x * BT_POSE_POS_SCALE,
+        .Y = bt_rx_data->y * BT_POSE_POS_SCALE,
+        .Z = bt_rx_data->z * BT_POSE_POS_SCALE,
+        .A = bt_rx_data->roll,
+        .B = bt_rx_data->pitch,
+        .C = bt_rx_data->yaw,
+        .hasR = false,
+    };
+    target_pose.X = Limit_Float(target_pose.X, DUMMY_CMD_WORKSPACE_X_MIN, DUMMY_CMD_WORKSPACE_X_MAX);
+    target_pose.Y = Limit_Float(target_pose.Y, DUMMY_CMD_WORKSPACE_Y_MIN, DUMMY_CMD_WORKSPACE_Y_MAX);
+    target_pose.Z = Limit_Float(target_pose.Z, DUMMY_CMD_WORKSPACE_Z_MIN, DUMMY_CMD_WORKSPACE_Z_MAX);
+    target_pose.A = Limit_Float(Normalize_Pose_Angle(target_pose.A), DUMMY_CMD_POSE_ATT_MIN, DUMMY_CMD_POSE_ATT_MAX);
+    target_pose.B = Limit_Float(Normalize_Pose_Angle(target_pose.B), DUMMY_CMD_POSE_ATT_MIN, DUMMY_CMD_POSE_ATT_MAX);
+    target_pose.C = Limit_Float(Normalize_Pose_Angle(target_pose.C), DUMMY_CMD_POSE_ATT_MIN, DUMMY_CMD_POSE_ATT_MAX);
+    dummy_cmd_debug.bt_target_x = target_pose.X;
+    dummy_cmd_debug.bt_target_y = target_pose.Y;
+    dummy_cmd_debug.bt_target_z = target_pose.Z;
+
+    if (Bt_Pose_Try_Solve(&target_pose))
+    {
+        dummy_cmd_debug.bt_last_status = DUMMY_CMD_BT_STATUS_OK;
+        dummy_cmd_debug.bt_ik_ok_count++;
+        return true;
+    }
+
+#if BT_POSE_ATT_FALLBACK_ENABLE
+    if (dummy_fetch_data.current_pose.hasR)
+    {
+        target_pose.A = dummy_fetch_data.current_pose.A;
+        target_pose.B = dummy_fetch_data.current_pose.B;
+        target_pose.C = dummy_fetch_data.current_pose.C;
+    }
+    else
+    {
+        target_pose.A = 0.0f;
+        target_pose.B = 0.0f;
+        target_pose.C = 0.0f;
+    }
+    target_pose.hasR = false;
+    if (Bt_Pose_Try_Solve(&target_pose))
+    {
+        dummy_cmd_debug.bt_last_status = DUMMY_CMD_BT_STATUS_OK;
+        dummy_cmd_debug.bt_ik_ok_count++;
+        return true;
+    }
+#endif
+
+    dummy_cmd_debug.bt_last_status = DUMMY_CMD_BT_STATUS_IK_FAIL;
+    dummy_cmd_debug.bt_ik_fail_count++;
+    return false;
+}
+
+static bool Bt_Pose_Try_Solve(const Pose6D_t *target_pose)
+{
+    IKSolves_t solves;
+    Joint6D_t current_joints = dummy_fetch_data.current_joints_feedback;
+
+    DummyCmd_Motor_To_Controller_Joints(&dummy_fetch_data.current_joints_feedback, &current_joints);
+
+    if (Kinematic_SolveIK(cmd_kinematic_handle, target_pose, &current_joints, &solves))
+    {
+        int best = Kinematic_Select_Best_Sol(cmd_kinematic_handle, &solves, &current_joints);
+        if (best >= 0)
+        {
+            DummyCmd_Set_Controller_Joints(ARM_CUSTOM_MODE, &solves.config[best]);
+            return true;
+        }
+    }
+
+    return false;
 }
 #endif
 
@@ -396,18 +565,8 @@ static void Vision_Set_FeedData(void)
     vision_tx_data.joint5 = dummy_fetch_data.joint_motor[4].reduction_angle;
     vision_tx_data.joint6 = dummy_fetch_data.joint_motor[5].reduction_angle;
 
-    uint8_t all_finished = 1;
-    for (int i = 0; i < 6; i++)
-    {
-        if (dummy_fetch_data.joint_motor[i].is_finished == 0)
-        {
-            all_finished = 0;
-            break;
-        }
-    }
-
     // 根据要求，当所有电机完成时设置为11，否则为0
-    vision_tx_data.is_finished = all_finished;
+    vision_tx_data.is_finished = DummyCmd_Get_Motion_Finished_Feedback();
     vision_tx_data.tailer = 0XFFFB;
     Vision_Send_Data((uint8_t *)&vision_tx_data, sizeof(Transmit_Data_s));
 }
@@ -422,17 +581,8 @@ static void Bt_Set_FeedData(void)
     bt_tx_data.joint5 = dummy_fetch_data.joint_motor[4].reduction_angle;
     bt_tx_data.joint6 = dummy_fetch_data.joint_motor[5].reduction_angle;
 
-    uint8_t all_finished = 1;
-    for (int i = 0; i < 6; i++)
-    {
-        if (dummy_fetch_data.joint_motor[i].is_finished == 0)
-        {
-            all_finished = 0;
-            break;
-        }
-    }
     // 根据要求，当所有电机完成时设置为11，否则为0
-    bt_tx_data.is_finished = all_finished;
+    bt_tx_data.is_finished = DummyCmd_Get_Motion_Finished_Feedback();
     bt_tx_data.tailer = 0XFFFB;
     BT_SendData((uint8_t *)&bt_tx_data, sizeof(TX_BT_Data_s));
 }

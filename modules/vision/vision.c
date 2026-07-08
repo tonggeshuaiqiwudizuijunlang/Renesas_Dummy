@@ -28,9 +28,13 @@ static void HostRxCallback(void)
     if (!host_usart_instance) return;
 
     // 将 FSP 接收到的缓存块放入软 FIFO
-    uint8_t *new_data = host_usart_instance->recv_buff; 
+    uint8_t *new_data = host_usart_instance->recv_buff;
+    uint16_t recv_len = host_usart_instance->recv_len;
+
+    if (recv_len == 0U)
+        recv_len = host_usart_instance->recv_buff_size;
     
-    for (int i = 0; i < host_usart_instance->recv_buff_size; i++)
+    for (uint16_t i = 0; i < recv_len; i++)
     {
         host_raw_fifo[host_fifo_head] = new_data[i];
         host_fifo_head = (host_fifo_head + 1) % RX_RAW_FIFO_SIZE;

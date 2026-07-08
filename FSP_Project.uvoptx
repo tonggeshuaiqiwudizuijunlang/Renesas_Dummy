@@ -135,7 +135,7 @@
         <SetRegEntry>
           <Number>0</Number>
           <Key>CMSIS_AGDI_V8M</Key>
-          <Name>-X"Horco CMSIS-DAP v2" -U507874000513 -O206 -S9 -C0 -P00000000 -N00("") -D00(00000000) -L00(0) -TO65554 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC20000 -FN3 -FF0RA6M5_2M.FLM -FS00 -FL0200000 -FP0($$Device:R7FA6M5BH$Flash\RA6M5_2M.FLM) -FF1RA6M5_DATA_C2M.FLM -FS18000000 -FL12000 -FP1($$Device:R7FA6M5BH$Flash\RA6M5_DATA_C2M.FLM) -FF2RA6M5_CONF.FLM -FS2100A100 -FL2200 -FP2($$Device:R7FA6M5BH$Flash\RA6M5_CONF.FLM)</Name>
+          <Name>-X"WCH CMSIS-DAP" -U0001A0000001 -O206 -S9 -C0 -P00000000 -N00("ARM CoreSight SW-DP") -D00(6BA02477) -L00(0) -TO65554 -TC10000000 -TT10000000 -TP20 -TDS8007 -TDT0 -TDC1F -TIEFFFFFFFF -TIP8 -FO15 -FD20000000 -FC20000 -FN3 -FF0RA6M5_2M.FLM -FS00 -FL0200000 -FP0($$Device:R7FA6M5BH$Flash\RA6M5_2M.FLM) -FF1RA6M5_DATA_C2M.FLM -FS18000000 -FL12000 -FP1($$Device:R7FA6M5BH$Flash\RA6M5_DATA_C2M.FLM) -FF2RA6M5_CONF.FLM -FS2100A100 -FL2200 -FP2($$Device:R7FA6M5BH$Flash\RA6M5_CONF.FLM)</Name>
         </SetRegEntry>
         <SetRegEntry>
           <Number>0</Number>
@@ -157,25 +157,9 @@
         <Bp>
           <Number>0</Number>
           <Type>0</Type>
-          <LineNumber>59</LineNumber>
+          <LineNumber>107</LineNumber>
           <EnabledFlag>1</EnabledFlag>
-          <Address>3262</Address>
-          <ByteObject>0</ByteObject>
-          <HtxType>0</HtxType>
-          <ManyObjects>0</ManyObjects>
-          <SizeOfObject>0</SizeOfObject>
-          <BreakByAccess>0</BreakByAccess>
-          <BreakIfRCount>1</BreakIfRCount>
-          <Filename>.\modules\step_motor\step_motor.c</Filename>
-          <ExecCommand></ExecCommand>
-          <Expression>\\FSP_Project\modules/step_motor/step_motor.c\59</Expression>
-        </Bp>
-        <Bp>
-          <Number>1</Number>
-          <Type>0</Type>
-          <LineNumber>20</LineNumber>
-          <EnabledFlag>1</EnabledFlag>
-          <Address>1092</Address>
+          <Address>1226</Address>
           <ByteObject>0</ByteObject>
           <HtxType>0</HtxType>
           <ManyObjects>0</ManyObjects>
@@ -184,54 +168,35 @@
           <BreakIfRCount>1</BreakIfRCount>
           <Filename>.\modules\bluetooth\bluetooth.c</Filename>
           <ExecCommand></ExecCommand>
-          <Expression>\\FSP_Project\modules/bluetooth/bluetooth.c\20</Expression>
+          <Expression>\\FSP_Project\modules/bluetooth/bluetooth.c\107</Expression>
+        </Bp>
+        <Bp>
+          <Number>1</Number>
+          <Type>0</Type>
+          <LineNumber>20</LineNumber>
+          <EnabledFlag>1</EnabledFlag>
+          <Address>0</Address>
+          <ByteObject>0</ByteObject>
+          <HtxType>0</HtxType>
+          <ManyObjects>0</ManyObjects>
+          <SizeOfObject>0</SizeOfObject>
+          <BreakByAccess>0</BreakByAccess>
+          <BreakIfRCount>0</BreakIfRCount>
+          <Filename>.\modules\bluetooth\bluetooth.c</Filename>
+          <ExecCommand></ExecCommand>
+          <Expression></Expression>
         </Bp>
       </Breakpoint>
       <WatchWindow1>
         <Ww>
           <count>0</count>
           <WinNumber>1</WinNumber>
-          <ItemText>mc_data,0x0A</ItemText>
+          <ItemText>bt_rx_data</ItemText>
         </Ww>
         <Ww>
           <count>1</count>
           <WinNumber>1</WinNumber>
-          <ItemText>dummy_feed_data,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>2</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>dummy_cmd_send,0x0A</ItemText>
-        </Ww>
-        <Ww>
-          <count>3</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>vision_tx_data</ItemText>
-        </Ww>
-        <Ww>
-          <count>4</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>dummy_fetch_data</ItemText>
-        </Ww>
-        <Ww>
-          <count>5</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>vision_rx_data</ItemText>
-        </Ww>
-        <Ww>
-          <count>6</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>p_args-&gt;event</ItemText>
-        </Ww>
-        <Ww>
-          <count>7</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>bt_tx_data</ItemText>
-        </Ww>
-        <Ww>
-          <count>8</count>
-          <WinNumber>1</WinNumber>
-          <ItemText>bt_received_data</ItemText>
+          <ItemText>target,0x0A</ItemText>
         </Ww>
       </WatchWindow1>
       <Tracepoint>

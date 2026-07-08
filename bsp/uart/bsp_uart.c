@@ -20,6 +20,7 @@ USARTInstance *USARTRegister(USART_Init_Config_s *init_config)
     instance->p_cfg = init_config->p_uart_cfg;
     instance->module_callback = init_config->module_callback;
     instance->recv_buff_size = init_config->recv_buff_size; // 传入数据包长度
+    instance->use_rx_char = init_config->use_rx_char;
     usart_instance[idx++] = instance;
 
     /* Open */
@@ -32,7 +33,10 @@ USARTInstance *USARTRegister(USART_Init_Config_s *init_config)
     }
 
     /* 启动 DTC 接收 */
-    R_SCI_UART_Read(instance->p_ctrl, instance->recv_buff, instance->recv_buff_size);
+    if (!instance->use_rx_char)
+    {
+        R_SCI_UART_Read(instance->p_ctrl, instance->recv_buff, instance->recv_buff_size);
+    }
     
     return instance;
 }
@@ -63,14 +67,21 @@ void UART_Global_Callback(uart_callback_args_t *p_args)
     /* 本次接收完成 */
     if (p_args->event == UART_EVENT_RX_COMPLETE)
     {
+        target->recv_len = target->recv_buff_size;
         if (target->module_callback) target->module_callback();
-        R_SCI_UART_Read(target->p_ctrl, target->recv_buff, target->recv_buff_size);
+        target->recv_len = 0;
+        if (!target->use_rx_char)
+        {
+            R_SCI_UART_Read(target->p_ctrl, target->recv_buff, target->recv_buff_size);
+        }
     }
     /* 处理单字节接收事件 (不使用 DTC 时触发此事件) */
     if (p_args->event == UART_EVENT_RX_CHAR)
     {
         /* 获取数据 */
         uint8_t data = (uint8_t)p_args->data;
+        target->recv_buff[0] = data;
+        target->recv_len = 1;
         
         /* 存入环形缓冲区 */
         uint16_t next_head = (target->head + 1) % UART_RING_BUFFER_SIZE;
@@ -81,6 +92,7 @@ void UART_Global_Callback(uart_callback_args_t *p_args)
         target->head = next_head;        
         /* 可选：每收到一个字节都回调，或者在上层定时轮询 */
         if (target->module_callback) target->module_callback(); 
+        target->recv_len = 0;
     }
     else if (p_args->event == UART_EVENT_TX_COMPLETE)
     {
@@ -94,7 +106,11 @@ void USART_Force_Restart(USARTInstance *_instance)
 {
     if (!_instance) return;
     // 停止旧的接收请求，再重新提交接收，避免串口错误后接收链路卡住
+    _instance->recv_len = 0;
     (void)R_SCI_UART_Abort(_instance->p_ctrl, UART_DIR_RX);
-    (void)R_SCI_UART_Read(_instance->p_ctrl, _instance->recv_buff, _instance->recv_buff_size);
+    if (!_instance->use_rx_char)
+    {
+        (void)R_SCI_UART_Read(_instance->p_ctrl, _instance->recv_buff, _instance->recv_buff_size);
+    }
 }
 
